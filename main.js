@@ -789,8 +789,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                             // Use requestAnimationFrame for smoother transition timing
                                             requestAnimationFrame(() => {
                                                 // Seamless transition: prepare next audio immediately
-                                                const nextSection = narrativeSections[nextSectionIndex];
-                                                const nextAudio = nextSection.querySelector('audio');
+                                            const nextSection = narrativeSections[nextSectionIndex];
+                                            const nextAudio = nextSection.querySelector('audio');
                                                 
                                                 // Preload next audio for instant playback
                                                 if (nextAudio) {
@@ -800,9 +800,9 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 
                                                 // Update current section
                                                 currentSection = nextSectionIndex;
-                                                
+                                            
                                                 // Show next section with seamless transition
-                                                scrollToSection(currentSection);
+                                            scrollToSection(currentSection);
                                                 updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
                                             });
                                         }
@@ -953,16 +953,16 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update navigation buttons to show next button if auto-advance is disabled
             updateNavigationButtons();
             
-                                                // Auto-advance to next panel only if auto-advance is enabled and not in an ending
-                                    if (autoAdvanceEnabled && !window.isSleepEnding) {
-                                        console.log('Auto-advance enabled, advancing to next panel');
-                                        const nextSectionIndex = currentSection + 1;
-                                        if (nextSectionIndex < narrativeSections.length) {
+            // Auto-advance to next panel only if auto-advance is enabled and not in an ending
+            if (autoAdvanceEnabled && !window.isSleepEnding) {
+                console.log('Auto-advance enabled, advancing to next panel');
+                const nextSectionIndex = currentSection + 1;
+                if (nextSectionIndex < narrativeSections.length) {
                                             // Use requestAnimationFrame for smoother transition timing
                                             requestAnimationFrame(() => {
                                                 // Seamless transition: prepare next audio immediately
-                                                const nextSection = narrativeSections[nextSectionIndex];
-                                                const nextAudio = nextSection.querySelector('audio');
+                    const nextSection = narrativeSections[nextSectionIndex];
+                    const nextAudio = nextSection.querySelector('audio');
                                                 
                                                 // Preload next audio for instant playback
                                                 if (nextAudio) {
@@ -972,13 +972,13 @@ document.addEventListener('DOMContentLoaded', function() {
                                                 
                                                 // Update current section
                                                 currentSection = nextSectionIndex;
-                                                
+                    
                                                 // Show next section with seamless transition
-                                                scrollToSection(currentSection);
+                    scrollToSection(currentSection);
                                                 updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
                                             });
-                                        }
-                                    }
+                }
+            }
         };
         
         // Add timeupdate listener for media player sync
@@ -1674,7 +1674,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Setup auto-advance toggle
-    setupAutoAdvanceToggle();
+        setupAutoAdvanceToggle();
 
     // Setup video overlay
     setupVideoOverlay();

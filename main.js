@@ -162,6 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeSoundsSection();
     }
 
+    // Setup video overlay functionality globally
+    setupVideoOverlay();
+
     // --- Navigation (Global) ---
     navItems.forEach(item => {
         item.addEventListener('click', function() {
@@ -294,6 +297,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupBranchingChoice();
         setupAudioUnlock();
         setupGlobalMediaPlayer(); // Initialize global media player
+        setupVideoOverlay(); // Initialize video overlay functionality
     }
 
     // Setup audio unlock functionality
@@ -1628,9 +1632,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Call setup function when document is ready
-    document.addEventListener('DOMContentLoaded', () => {
-        setupAutoAdvanceToggle();
-        // ... rest of your initialization code ...
-    });
+    // Setup video overlay functionality
+    function setupVideoOverlay() {
+        const videoOverlay = document.getElementById('videoOverlay');
+        const videoPlayBtn = document.getElementById('videoPlayBtn');
+        const youtubeVideo = document.getElementById('youtubeVideo');
+        
+        if (videoOverlay && videoPlayBtn && youtubeVideo) {
+            // Add click event to overlay and play button
+            const handleVideoClick = () => {
+                console.log('Video overlay clicked - showing YouTube video');
+                
+                // Hide overlay with animation
+                videoOverlay.classList.add('hidden');
+                
+                // Show YouTube video after overlay fades out
+                setTimeout(() => {
+                    videoOverlay.style.display = 'none';
+                    youtubeVideo.style.display = 'block';
+                    
+                    // Update iframe src to enable autoplay
+                    const currentSrc = youtubeVideo.src;
+                    if (!currentSrc.includes('autoplay=1')) {
+                        const separator = currentSrc.includes('?') ? '&' : '?';
+                        youtubeVideo.src = currentSrc + separator + 'autoplay=1&rel=0';
+                    }
+                    
+                    // Ensure video is properly sized
+                    youtubeVideo.style.width = '100%';
+                    youtubeVideo.style.height = '100%';
+                    
+                    console.log('YouTube video is now visible and should be playing');
+                }, 300);
+            };
+            
+            videoOverlay.addEventListener('click', handleVideoClick);
+            videoPlayBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent double-triggering
+                handleVideoClick();
+            });
+            
+            console.log('Video overlay functionality setup complete');
+        } else {
+            console.log('Video overlay elements not found');
+        }
+    }
+
+    // Setup auto-advance toggle
+    setupAutoAdvanceToggle();
 });

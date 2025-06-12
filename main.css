@@ -3799,3 +3799,42 @@ body {
         max-height: 60vh; /* was 70vh */
     }
 }
+
+@media (max-width: 600px) {
+  #volumeControlContainer,
+  #globalMediaPlayer {
+    left: 50%;
+    right: auto;
+    transform: translateX(-50%);
+    bottom: 70px; /* stack above the other */
+    width: 95vw;
+    max-width: 400px;
+    min-width: 0;
+    box-sizing: border-box;
+    justify-content: center;
+  }
+  #globalMediaPlayer {
+    bottom: 15px;
+    margin-top: 0;
+  }
+  #volumeControlContainer {
+    bottom: 70px;
+    margin-bottom: 0;
+  }
+}
+
+@media (max-width: 480px) {
+  #volumeControlContainer,
+  #globalMediaPlayer {
+    width: 98vw;
+    max-width: 98vw;
+    padding-left: 4vw;
+    padding-right: 4vw;
+  }
+  #volumeControlContainer {
+    bottom: 70px;
+  }
+  #globalMediaPlayer {
+    bottom: 10px;
+  }
+}

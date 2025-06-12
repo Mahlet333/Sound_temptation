@@ -390,18 +390,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show notification
         showNotification('The story has ended. You can restart to explore the other path.');
     };
-
-    // Handle user choice
     function handleChoice(choice) {
         console.log('Handling choice:', choice);
         stopCurrentAudio();
-
-        // Hide all narrative sections before showing the target
+    
+        // Hide all narrative sections and remove active class
         document.querySelectorAll('.narrative-section').forEach(section => {
             section.style.display = 'none';
             section.classList.remove('active');
         });
-
+    
         if (choice === 'sleep') {
             showNotification('He chooses rest over communion...');
             // Hide pray branch panels
@@ -411,13 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     section.classList.remove('active');
                 }
             });
-            // Set a flag to prevent auto-advance after sleep ending
             window.isSleepEnding = true;
-            // Set current section to 5 and use standard navigation logic for autoplay
             currentSection = 5;
             scrollToSection(5);
             
-            // Get the sleep ending section and its audio
             const sleepSection = document.querySelector('.ending-sleep');
             if (sleepSection) {
                 sleepSection.style.display = 'flex';
@@ -431,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentPlayButton = playButton;
                     updateGlobalMediaPlayer(sleepAudio);
                     
-                    // Force autoplay for sleep ending
                     if (audioContextUnlocked) {
                         audioCompleted = false;
                         canNavigate = false;
@@ -439,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             updatePlayButtonState(playButton, sleepAudio, true);
                             if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
                             
-                            // Add onended listener for sleep ending
                             sleepAudio.onended = () => {
                                 console.log('Sleep ending audio completed - showing final page');
                                 updatePlayButtonState(playButton, sleepAudio, false);
@@ -455,11 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Now disable auto-advance for sleep branch
             autoAdvanceEnabled = false;
             return;
         }
-
+    
         let targetSection;
         if (choice === 'pray') {
             targetSection = document.querySelector('.narrative-section[data-section="6"]');
@@ -471,33 +463,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     section.classList.remove('active');
                 }
             });
-            // Reset sleep ending flag
             window.isSleepEnding = false;
-            // Enable auto-advance for pray branch
             autoAdvanceEnabled = true;
         }
-
+    
         if (targetSection) {
-            // Special handling for panel 6 as first panel after branching
-            const sectionNum = targetSection.dataset.section;
-            if (sectionNum === '6') {
-                targetSection.style.display = 'flex';
-                targetSection.style.alignItems = 'center';
-                targetSection.style.justifyContent = 'center';
-            } else {
-                targetSection.style.display = 'flex';
-            }
+            // Rely on CSS for display and flex properties
+            targetSection.style.display = 'flex';
             targetSection.classList.add('active');
-
-            // --- Ensure play button and audio are set up for this panel ---
+            currentSection = parseInt(targetSection.dataset.section);
+    
+            // Reset story-image styles to ensure consistency
+            const storyImage = targetSection.querySelector('.story-image');
+            if (storyImage) {
+                storyImage.style.width = '';
+                storyImage.style.height = '';
+                storyImage.style.transform = '';
+                // Force layout reflow
+                storyImage.offsetHeight; // Trigger reflow
+            }
+    
+            // Scroll to section
+            scrollToSection(currentSection);
+    
             const audio = targetSection.querySelector('audio');
             const playButton = targetSection.querySelector('.play-btn');
             if (audio && playButton) {
                 currentAudio = audio;
                 currentPlayButton = playButton;
                 updateGlobalMediaPlayer(audio);
-                updatePlayButtonState(playButton, audio, false); // Ensure play button is visible and reset
-                // Force autoplay for pray choice
+                updatePlayButtonState(playButton, audio, false);
+                
                 if (audioContextUnlocked) {
                     audioCompleted = false;
                     canNavigate = false;
@@ -511,25 +507,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             }
-            // --- End setup ---
-
-            // Add onended listener for auto-advance
+    
             if (audio) {
                 audio.onended = () => {
                     updatePlayButtonState(playButton, audio, false);
                     if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
                     canNavigate = true;
                     audioCompleted = true;
-                    // For pray branch, only show final page after panel 9
                     if (targetSection.dataset.section === '9') {
                         console.log('Pray branch completed - showing final page');
                         showFinalPage();
                         return;
                     }
-                    // For pray branch, continue to next panel
                     if (autoAdvanceEnabled) {
                         const nextSectionIndex = parseInt(targetSection.dataset.section) + 1;
-                        if (nextSectionIndex <= 9) { // Only advance up to panel 9
+                        if (nextSectionIndex <= 9) {
                             currentSection = nextSectionIndex;
                             scrollToSection(currentSection);
                             updateActiveNarrativeSection(false, true);

@@ -19,13 +19,11 @@ html, body {
     height: 100%;
     margin: 0;
     padding: 0;
-    padding-top: 60px; /* Add top padding to create space below fixed navigation */
     font-family: 'Space Grotesk', sans-serif;
     color: #ffffff;
     background-color: #000000;
-    overflow-x: hidden; /* Prevent horizontal scroll bar on main page */
-    position: relative; /* For proper positioning of fixed elements */
-    /* Remove overflow-y: hidden to allow vertical scroll */
+    overflow-x: hidden;
+    position: relative;
 }
 
 /* Prevent horizontal overflow on all elements */
@@ -39,6 +37,7 @@ html, body {
     overflow: hidden;
     position: relative;
     background: #000;
+    padding: 0;
 }
 
 .sounds-container {
@@ -103,12 +102,28 @@ body {
     background: #000000;
     color: #ffffff;
     line-height: 1.2;
-    padding: 0 0 140px 0; /* Add bottom padding for fixed controls */
     width: 100%;
     min-height: 100vh;
     position: relative;
-    /* overflow: hidden;  Remove this to allow scrolling */
-    height: 100%;
+}
+
+/* ==========================================================================
+   Layout Foundation
+   ========================================================================== */
+
+/* Ensure fixed elements don't interfere with layout */
+.nav,
+#globalMediaPlayer,
+#volumeControlContainer,
+.auto-advance-mode {
+    position: fixed;
+    z-index: 1000;
+}
+
+/* Clear height conflicts */
+.section:not(.sounds-page) {
+    height: auto;
+    min-height: calc(100vh - 80px);
 }
 
 /* ==========================================================================
@@ -433,10 +448,9 @@ body {
 .section {
     min-height: 100vh;
     display: none;
-    padding: 120px 40px 60px 40px;
+    padding: 80px 20px 20px 20px;
     position: relative;
     box-sizing: border-box;
-    /* Remove height and overflow restrictions for general sections */
     height: auto;
     overflow: visible;
     opacity: 0;
@@ -460,7 +474,7 @@ body {
     overflow: visible !important;
     display: none;
     flex-direction: column;
-    padding-top: 40px !important;
+    padding: 80px 20px 20px 20px !important;
 }
 
 #behind-scenes.section.active {
@@ -1001,7 +1015,7 @@ body {
     overflow: visible !important;
     display: none;
     flex-direction: column;
-    padding-top: 60px !important;
+    padding: 80px 20px 20px 20px !important;
 }
 
 #team.section.active {
@@ -1664,7 +1678,7 @@ body {
     overflow: visible !important;
     display: none;
     flex-direction: column;
-    padding-top: 60px !important;
+    padding: 80px 20px 20px 20px !important;
 }
 
 #about.section.active {
@@ -1956,13 +1970,18 @@ body {
 /* Mobile navigation styles moved to main navigation section above */
 
 @media (max-width: 768px) {
+    body {
+        padding-bottom: 80px; /* Space for mobile controls */
+    }
+    
     .section {
-        padding: 100px 16px 40px 16px; /* Reduced top padding for mobile nav */
+        padding: 80px 16px 20px 16px;
+        min-height: calc(100vh - 80px); /* Account for controls */
     }
 
     .hero-container {
-        padding-bottom: 40px;
-        padding-top: 20px; /* Add some top padding for mobile */
+        padding: 20px 10px;
+        min-height: auto;
     }
 
     .title-stack {
@@ -2772,7 +2791,7 @@ body {
 
 #home.section,
 #home {
-    padding-top: 60px !important;
+    padding: 80px 20px 20px 20px !important;
 }
 
 .hero-container {
@@ -2782,7 +2801,7 @@ body {
 @media (max-width: 900px) {
     #home.section,
     #home {
-        padding-top: 40px !important;
+        padding: 80px 20px 20px 20px !important;
     }
     .hero-container {
         padding-top: 0 !important;
@@ -3123,30 +3142,10 @@ body {
 }
 
 /* ==========================================================================
-   Mobile Flexbox Layout Refactor
+   Mobile Layout Improvements
    ========================================================================== */
 
-/* Base mobile improvements */
 @media (max-width: 768px) {
-    /* General body and viewport setup */
-    body {
-        padding-top: 80px; /* Space for mobile nav */
-        height: 100vh;
-        overflow-x: hidden;
-    }
-
-    /* Navigation adjustments already handled above */
-    
-    /* Section base flexbox setup */
-    .section {
-        display: flex;
-        flex-direction: column;
-        min-height: calc(100vh - 80px); /* Account for nav height */
-        padding: 20px 16px 80px 16px; /* Space for nav and controls */
-        justify-content: flex-start;
-        align-items: stretch;
-    }
-
     /* Home section specific mobile flexbox */
     #home {
         justify-content: space-between;
@@ -3213,27 +3212,20 @@ body {
     .sounds-page {
         height: 100vh;
         overflow: hidden;
-        display: flex;
-        flex-direction: column;
+        padding: 0;
     }
 
     .sounds-container {
         flex: 1;
-        display: flex;
-        flex-direction: column;
         height: 100%;
         overflow: hidden;
     }
 
     /* Narrative sections mobile flexbox */
     .narrative-section {
-        display: flex;
-        flex-direction: column;
-        justify-content: flex-start;
-        align-items: center;
         min-height: 100vh;
         width: 100vw;
-        padding: 20px 15px 120px 15px; /* Space for controls */
+        padding: 20px 15px 80px 15px;
         text-align: center;
         position: relative;
         overflow-y: auto;
@@ -3525,29 +3517,31 @@ body {
     }
 }
 
-/* Enhanced mobile flexbox for very small screens */
+/* Enhanced mobile layout for very small screens */
 @media (max-width: 480px) {
     /* Body adjustments for smallest screens */
     body {
-        padding-top: 70px; /* Smaller nav space */
+        padding-bottom: 70px;
     }
 
     /* Section adjustments */
     .section {
-        padding: 15px 12px 70px 12px;
+        padding: 60px 12px 20px 12px;
         min-height: calc(100vh - 70px);
     }
 
     /* Narrative section compact flexbox */
     .narrative-section {
-        padding: 15px 10px 80px 10px;
+        padding: 20px 10px 80px 10px;
         gap: 15px;
+        min-height: calc(100vh - 80px);
     }
 
     .narrative-content {
-        padding: 15px 5px;
+        padding: 10px 5px;
         gap: 15px;
         min-height: 0;
+        overflow-y: auto;
     }
 
     /* Image carousel compact */

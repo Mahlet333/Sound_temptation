@@ -211,6 +211,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // Pause YouTube video when leaving behind-scenes section
+            const currentActiveSection = document.querySelector('.section.active');
+            if (currentActiveSection && currentActiveSection.id === 'behind-scenes' && targetId !== 'behind-scenes') {
+                pauseYouTubeVideo();
+            }
+            
             // Add click feedback
             this.style.transform = 'translateY(-2px) scale(0.95)';
             setTimeout(() => {
@@ -231,6 +237,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show specific section
     function showSection(targetId) {
         console.log('Showing section:', targetId);
+        
+        // Pause YouTube video when leaving behind-scenes section
+        const currentActiveSection = document.querySelector('.section.active');
+        if (currentActiveSection && currentActiveSection.id === 'behind-scenes' && targetId !== 'behind-scenes') {
+            pauseYouTubeVideo();
+        }
+        
         sections.forEach(section => {
             if (section.id === targetId) {
                 section.classList.add('active');
@@ -1608,28 +1621,10 @@ document.addEventListener('DOMContentLoaded', function() {
         triggerBtn.addEventListener('click', showFirstPanel);
     }
 
-    // Add auto-advance toggle button to the UI
+    // Auto-advance toggle functionality is now handled by the existing autoAdvanceIndicator
     function setupAutoAdvanceToggle() {
-        const volumeControlContainer = document.getElementById('volumeControlContainer');
-        if (volumeControlContainer) {
-            const autoAdvanceToggle = document.createElement('button');
-            autoAdvanceToggle.id = 'autoAdvanceToggle';
-            autoAdvanceToggle.className = 'auto-advance-toggle';
-            autoAdvanceToggle.innerHTML = `
-                <span class="toggle-icon">⏭️</span>
-                <span class="toggle-text">Auto-Advance: ON</span>
-            `;
-            autoAdvanceToggle.title = 'Toggle auto-advance';
-            
-            autoAdvanceToggle.addEventListener('click', () => {
-                autoAdvanceEnabled = !autoAdvanceEnabled;
-                const toggleText = autoAdvanceToggle.querySelector('.toggle-text');
-                toggleText.textContent = `Auto-Advance: ${autoAdvanceEnabled ? 'ON' : 'OFF'}`;
-                showNotification(`Auto-advance ${autoAdvanceEnabled ? 'enabled' : 'disabled'}`);
-            });
-            
-            volumeControlContainer.appendChild(autoAdvanceToggle);
-        }
+        // This function is no longer needed - auto-advance toggle is handled by autoAdvanceIndicator
+        console.log('Auto-advance toggle handled by existing autoAdvanceIndicator in top right');
     }
 
     // Setup video overlay functionality
@@ -1680,4 +1675,121 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Setup auto-advance toggle
     setupAutoAdvanceToggle();
+
+    // Setup video overlay
+    setupVideoOverlay();
+    
+    // Setup mobile burger menu
+    setupBurgerMenu();
+
+    // Add event listeners for video cleanup
+    setupVideoCleanup();
 });
+
+// Mobile Burger Menu Functionality
+function setupBurgerMenu() {
+    const navBurger = document.getElementById('navBurger');
+    const navItems = document.getElementById('navItems');
+    
+    if (!navBurger || !navItems) {
+        console.log('Burger menu elements not found');
+        return;
+    }
+    
+    // Toggle mobile menu
+    navBurger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        navBurger.classList.toggle('active');
+        navItems.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (navItems.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a nav item
+    const navItemElements = navItems.querySelectorAll('.nav-item');
+    navItemElements.forEach(item => {
+        item.addEventListener('click', () => {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (navItems.classList.contains('active') && 
+            !navItems.contains(e.target) && 
+            !navBurger.contains(e.target)) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu on window resize if desktop view
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navItems.classList.contains('active')) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    console.log('Burger menu setup complete');
+}
+
+// Function to pause/stop YouTube video
+function pauseYouTubeVideo() {
+    const youtubeVideo = document.getElementById('youtubeVideo');
+    const videoOverlay = document.getElementById('videoOverlay');
+    
+    if (youtubeVideo && videoOverlay) {
+        console.log('Pausing YouTube video');
+        
+        // Hide the video and show overlay again
+        youtubeVideo.style.display = 'none';
+        videoOverlay.classList.remove('hidden');
+        
+        // Reset the video src to stop playback completely
+        const originalSrc = youtubeVideo.src.split('?')[0]; // Remove query parameters
+        youtubeVideo.src = originalSrc;
+        
+        console.log('YouTube video paused and reset');
+    }
+}
+
+// Setup video cleanup event listeners
+function setupVideoCleanup() {
+    // Pause video when page is about to unload
+    window.addEventListener('beforeunload', () => {
+        pauseYouTubeVideo();
+    });
+    
+    // Pause video when page visibility changes (user switches tabs)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            const currentActiveSection = document.querySelector('.section.active');
+            if (currentActiveSection && currentActiveSection.id === 'behind-scenes') {
+                pauseYouTubeVideo();
+            }
+        }
+    });
+    
+    console.log('Video cleanup event listeners added');
+}

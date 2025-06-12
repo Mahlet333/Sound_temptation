@@ -130,6 +130,50 @@ body {
     backdrop-filter: blur(10px);
 }
 
+/* Navigation items container */
+.nav-items {
+    display: flex;
+    gap: 0;
+}
+
+/* Burger menu button - hidden on desktop */
+.nav-burger {
+    display: none;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 15px;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    position: relative;
+    z-index: 1001;
+}
+
+/* Burger menu lines */
+.burger-line {
+    width: 20px;
+    height: 2px;
+    background-color: #ffffff;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform-origin: center;
+}
+
+/* Burger menu animation when active */
+.nav-burger.active .burger-line:nth-child(1) {
+    transform: rotate(45deg) translate(6px, 6px);
+}
+
+.nav-burger.active .burger-line:nth-child(2) {
+    opacity: 0;
+    transform: scaleX(0);
+}
+
+.nav-burger.active .burger-line:nth-child(3) {
+    transform: rotate(-45deg) translate(6px, -6px);
+}
+
 /* Navigation item styles */
 .nav-item {
     padding: 15px 25px;
@@ -162,6 +206,81 @@ body {
 .nav-item.active {
     background: #ffffff;
     color: #000000;
+}
+
+/* Mobile Navigation Styles */
+@media (max-width: 768px) {
+    .nav {
+        top: 10px;
+        left: 10px;
+        right: 10px;
+        transform: none;
+        width: calc(100% - 20px);
+        max-width: none;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0;
+    }
+
+    .nav-burger {
+        display: flex;
+        order: 1;
+        margin-left: auto;
+    }
+
+    .nav-items {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100vh;
+        background: rgba(0, 0, 0, 0.95);
+        -webkit-backdrop-filter: blur(15px);
+        backdrop-filter: blur(15px);
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 20px;
+        transform: translateX(-100%);
+        transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        z-index: 999;
+    }
+
+    .nav-items.active {
+        transform: translateX(0);
+    }
+
+    .nav-item {
+        padding: 20px 40px;
+        font-size: 18px;
+        letter-spacing: 2px;
+        border: 2px solid #ffffff;
+        border-radius: 8px;
+        background: rgba(0, 0, 0, 0.8);
+        min-width: 200px;
+        text-align: center;
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s ease;
+    }
+
+    .nav-items.active .nav-item {
+        transform: translateY(0);
+        opacity: 1;
+    }
+
+    .nav-items.active .nav-item:nth-child(1) { transition-delay: 0.1s; }
+    .nav-items.active .nav-item:nth-child(2) { transition-delay: 0.2s; }
+    .nav-items.active .nav-item:nth-child(3) { transition-delay: 0.3s; }
+    .nav-items.active .nav-item:nth-child(4) { transition-delay: 0.4s; }
+    .nav-items.active .nav-item:nth-child(5) { transition-delay: 0.5s; }
+
+    .nav-item:hover {
+        background: #ffffff;
+        color: #000000;
+        transform: translateY(-5px) scale(1.05);
+        box-shadow: 0 10px 25px rgba(255, 255, 255, 0.2);
+    }
 }
 
 /* ==========================================================================
@@ -1787,9 +1906,9 @@ body {
     position: fixed;
     top: 70px;
     right: 20px;
-    padding: 8px 15px;
-    border-radius: 20px;
-    font-size: 0.8rem;
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
     color: #fff;
     display: flex; /* Always visible now */
     align-items: center;
@@ -1797,28 +1916,31 @@ body {
     z-index: 1000;
     cursor: pointer;
     transition: all 0.3s ease;
-    /* Default OFF state styling */
-    background: rgba(128, 128, 128, 0.3);
-    opacity: 0.7;
+    /* Transparent background like the bottom left toggle */
+    background: rgba(0, 0, 0, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    font-family: 'Space Grotesk', sans-serif;
 }
 
 .auto-advance-mode.active {
-    /* ON state styling */
-    background: rgba(0, 150, 255, 0.2);
-    opacity: 1;
+    /* ON state styling - slightly more opaque */
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .auto-advance-mode:hover {
-    transform: scale(1.05);
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .auto-advance-mode:hover:not(.active) {
-    background: rgba(128, 128, 128, 0.4);
-    opacity: 0.9;
+    background: rgba(0, 0, 0, 0.8);
+    border-color: rgba(255, 255, 255, 0.3);
 }
 
 .auto-advance-mode.active:hover {
-    background: rgba(0, 150, 255, 0.3);
+    background: rgba(0, 0, 0, 0.9);
+    border-color: rgba(255, 255, 255, 0.4);
 }
 
 .auto-advance-mode .icon {
@@ -1826,24 +1948,16 @@ body {
 }
 
 /* Responsive adjustments for navigation */
+/* Mobile navigation styles moved to main navigation section above */
+
 @media (max-width: 768px) {
-    .nav {
-        top: 10px;
-        gap: 0;
-    }
-
-    .nav-item {
-        padding: 10px 15px;
-        font-size: 12px;
-        border-right: 1px solid #ffffff;
-    }
-
     .section {
-        padding: 160px 16px 40px 16px;
+        padding: 100px 16px 40px 16px; /* Reduced top padding for mobile nav */
     }
 
     .hero-container {
         padding-bottom: 40px;
+        padding-top: 20px; /* Add some top padding for mobile */
     }
 
     .title-stack {
@@ -1852,6 +1966,7 @@ body {
 
     .main-title {
         font-size: clamp(3rem, 10vw, 8rem);
+        margin-bottom: 20px; /* Add margin for mobile */
     }
 
     .main-title.highlight {
@@ -1860,6 +1975,7 @@ body {
 
     .subtitle-container {
         gap: 10px;
+        margin-bottom: 30px; /* Add margin for mobile */
     }
 
     .subtitle {
@@ -1872,217 +1988,141 @@ body {
 
     .section-title {
         font-size: clamp(2rem, 8vw, 4rem);
+        margin-bottom: 20px; /* Consistent margin for mobile */
     }
 
     .narrative-text p {
         font-size: clamp(0.9rem, 3.5vw, 1.1rem);
     }
 
+    /* Team section mobile improvements */
     .team-content {
         flex-direction: column;
-        gap: 40px;
+        gap: 20px; /* Reduced gap for mobile */
+        margin-top: 20px; /* Reduced margin */
     }
 
-    .behind-scenes-content {
-        padding: 20px;
+    .team-member {
+        width: 100%;
+        max-width: 350px; /* Slightly smaller max width */
+        padding: 15px; /* Reduced padding */
     }
 
+    .team-photo {
+        width: 100%;
+        max-width: 180px; /* Smaller photos on mobile */
+        margin-bottom: 15px;
+    }
+
+    .member-name {
+        font-size: 1.5rem; /* Smaller text on mobile */
+    }
+
+    .member-role {
+        font-size: 0.9rem;
+        margin-bottom: 15px;
+    }
+
+    /* About section mobile improvements */
     .about-content {
-        padding: 20px;
+        grid-template-columns: 1fr; /* Stack items vertically on mobile */
+        gap: 30px; /* Reduced gap */
+        padding: 20px 0; /* Add padding */
     }
 
     .about-text p {
         font-size: 1rem;
+        margin-bottom: 20px; /* Consistent margin */
     }
 
-    .project-details {
-        flex-direction: column;
-        gap: 30px;
-    }
-
-    .detail-item {
-        padding: 15px;
-    }
-
-    .detail-label {
-        font-size: 0.9rem;
-    }
-
-    .detail-value {
-        font-size: 1rem;
-    }
-
-    .audio-player {
-        right: 20px;
-        bottom: 20px;
-        width: 60px; /* Revert to original width on smaller screens if slider hidden */
-    }
-
-    .volume-slider {
-        display: none; /* Hide slider on small screens if space is an issue */
-    }
-
-    .audio-control:hover .volume-slider {
-        left: -100px; /* Ensure hidden */
-    }
-
-    .video-link {
-        font-size: 1.1rem;
-    }
-
-    .cassette-player {
-        padding: 20px;
-    }
-
-    .cassette-container {
-        padding: 20px;
-        width: 280px;
-        height: 180px;
-    }
-
-    .video-container {
-        height: 150px;
-    }
-
-    .cassette-controls {
-        padding: 15px;
-    }
-
-    .tape-reels {
-        gap: 10px;
-    }
-
-    .reel {
-        width: 60px;
-        height: 60px;
-    }
-
-    .reel-center {
-        width: 15px;
-        height: 15px;
-    }
-
-    .control-btn {
-        padding: 8px 15px;
-        font-size: 0.8rem;
-        gap: 5px;
-    }
-
-    .cassette-header,
-    .cassette-label {
-        font-size: 0.9rem;
-    }
-
-    .horizontal-scroll-container {
-        padding: 0;
-    }
-
-    .narrative-section {
-        min-width: 100vw;
-        padding: 48px 4vw 24px 4vw;
-    }
-
-    .narrative-content {
-        padding: 1.5rem;
-    }
-
-    .home-title {
-        font-size: clamp(2rem, 8vw, 4rem);
-    }
-
-    .home-subtitle {
-        font-size: clamp(0.8rem, 2vw, 1.2rem);
-    }
-
-    .home-description {
-        margin-bottom: 10px;
-    }
-
-    .home-instruction {
-        margin-top: 10px;
-        margin-bottom: 10px;
-    }
-
-    .chapter-number {
-        font-size: clamp(3rem, 12vw, 5rem);
-        margin-bottom: 20px;
-    }
-
-    .narrative-title {
-        font-size: clamp(1.5rem, 8vw, 2.5rem);
+    .large-text {
+        font-size: 1.3rem !important; /* Smaller on mobile */
+        line-height: 1.4;
         margin-bottom: 30px;
     }
 
-    .narrative-text {
-        margin-bottom: 40px;
+    .project-details {
+        padding: 20px; /* Reduced padding */
+        margin-top: 20px;
     }
 
-    .narrative-text p {
-        font-size: clamp(0.9rem, 4vw, 1.1rem);
-        margin-bottom: 20px;
+    .detail-item {
+        padding: 12px 0; /* Reduced padding */
+        flex-direction: column; /* Stack label and value */
+        text-align: center;
+        gap: 5px;
     }
 
-    .play-btn {
-        padding: 15px 30px;
-        font-size: 1rem;
-        letter-spacing: 1px;
+    .detail-label {
+        font-size: 0.85rem;
     }
 
-    .audio-progress {
-        width: 280px;
-        height: 5px;
+    .detail-value {
+        font-size: 0.95rem;
     }
 
+    /* Behind scenes mobile improvements */
+    .behind-scenes-content {
+        grid-template-columns: 1fr; /* Stack vertically */
+        gap: 30px;
+        padding: 20px 0;
+    }
+
+    .process-item {
+        padding: 15px; /* Reduced padding */
+        margin-bottom: 15px; /* Reduced margin */
+        gap: 15px; /* Reduced gap */
+    }
+
+    .process-step {
+        font-size: 1.5rem; /* Smaller step numbers */
+        min-width: 40px;
+    }
+
+    .process-info h4 {
+        font-size: 1.1rem; /* Smaller headings */
+        margin-bottom: 8px;
+    }
+
+    .process-info p {
+        font-size: 0.9rem;
+        line-height: 1.5;
+    }
+
+    /* Audio player adjustments */
+    .audio-player {
+        right: 15px; /* Closer to edge on mobile */
+        bottom: 15px;
+        width: 60px; /* Smaller on mobile */
+    }
+
+    .volume-slider {
+        display: none; /* Hide slider on small screens */
+    }
+
+    .audio-control:hover .volume-slider {
+        left: -100px; /* Keep hidden */
+    }
+
+    /* CTA improvements */
     .cta-container {
-        margin-top: 60px;
-        padding: 30px 15px;
-    }
-
-    .cta-text {
-        font-size: 1.1rem;
-        margin-bottom: 25px;
+        margin-top: 30px;
+        padding: 20px 10px;
     }
 
     .cta-btn {
-        padding: 18px 35px;
+        padding: 15px 30px;
         font-size: 1rem;
-    }
-
-    .overview-container {
-        margin-top: 50px;
-        padding: 30px 15px;
-    }
-
-    .overview-features {
-        gap: 30px;
-    }
-
-    .image-carousel {
-        height: 55vh;
-        padding-top: 12px;
-        padding-bottom: 8px;
-        margin-bottom: 0.5rem;
-    }
-
-    .narrative-section .narrative-content {
-        padding: 1rem;
-    }
-
-    .panel-navigation {
-        position: static;
-        top: auto;
-        left: auto;
-        right: auto;
         width: 100%;
-        transform: none;
-        justify-content: center;
-        margin-top: 10px;
-        padding: 0;
+        max-width: 280px;
     }
 
-    .nav-btn {
-        padding: 8px 15px;
+    /* Auto-advance mode adjustments */
+    .auto-advance-mode {
+        top: 80px; /* Lower position to avoid burger menu */
+        right: 15px;
         font-size: 0.8rem;
+        padding: 6px 10px;
     }
 }
 
@@ -2808,38 +2848,7 @@ body {
     }
 }
 
-/* Auto-Advance Toggle Button Styles */
-.auto-advance-toggle {
-    position: fixed;
-    bottom: 20px;
-    left: 20px;
-    background: rgba(0, 0, 0, 0.7);
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    border-radius: 8px;
-    padding: 8px 12px;
-    color: #fff;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-family: 'Space Grotesk', sans-serif;
-    font-size: 0.9rem;
-    transition: all 0.3s ease;
-    z-index: 1000;
-}
-
-.auto-advance-toggle:hover {
-    background: rgba(0, 0, 0, 0.8);
-    border-color: rgba(255, 255, 255, 0.3);
-}
-
-.auto-advance-toggle .toggle-icon {
-    font-size: 1.1rem;
-}
-
-.auto-advance-toggle .toggle-text {
-    white-space: nowrap;
-}
+/* Auto-Advance Toggle Button Styles - REMOVED (functionality moved to top-right indicator) */
 
 /* Adjust volume control container to accommodate the new button */
 .volume-control-container {

@@ -16,11 +16,21 @@
          Navigation Bar
     ========================== -->
     <nav class="nav">
-        <div class="nav-item active" data-target="home">HOME</div>
-        <div class="nav-item" data-target="sounds">STORY BOOK</div>
-        <div class="nav-item" data-target="team">TEAM</div>
-        <div class="nav-item" data-target="about">ABOUT</div>
-        <div class="nav-item" data-target="behind-scenes">BEHIND SCENES</div>
+        <!-- Burger Menu Toggle Button (mobile only) -->
+        <button class="nav-burger" id="navBurger" aria-label="Toggle navigation menu">
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+            <span class="burger-line"></span>
+        </button>
+        
+        <!-- Navigation Items Container -->
+        <div class="nav-items" id="navItems">
+            <div class="nav-item active" data-target="home">HOME</div>
+            <div class="nav-item" data-target="sounds">STORY BOOK</div>
+            <div class="nav-item" data-target="team">TEAM</div>
+            <div class="nav-item" data-target="about">ABOUT</div>
+            <div class="nav-item" data-target="behind-scenes">BEHIND SCENES</div>
+        </div>
     </nav>
 
     <!-- Screen reader announcements -->

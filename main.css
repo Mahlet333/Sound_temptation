@@ -3766,8 +3766,6 @@ body {
         margin-bottom: 15px;
     }
 }
-<<<<<<< HEAD
-
 /* Special styles for panels 5 and 6 (first panels after branching) */
 .narrative-section[data-section="5"] .narrative-content,
 .narrative-section[data-section="6"] .narrative-content {
@@ -3788,7 +3786,7 @@ body {
     justify-content: center;
     align-items: center;
 }
-=======
+
 @media (min-width: 901px) {
     /* Desktop: keep image panels stuck to the top instead of being centred */
     .narrative-section .narrative-content {
@@ -3801,4 +3799,3 @@ body {
         max-height: 60vh; /* was 70vh */
     }
 }
->>>>>>> origin/Update

@@ -696,10 +696,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Update active narrative section and related states
-    function updateActiveNarrativeSection(skipAutoplay = false, forceAutoplay = false) {
-        console.log('Updating active narrative section. Current section:', currentSection, 'skipAutoplay:', skipAutoplay, 'forceAutoplay:', forceAutoplay);
+    function updateActiveNarrativeSection(skipAutoplay = false, forceAutoplay = false, isSeamlessTransition = false) {
+        console.log('Updating active narrative section. Current section:', currentSection, 'skipAutoplay:', skipAutoplay, 'forceAutoplay:', forceAutoplay, 'isSeamlessTransition:', isSeamlessTransition);
         
-        if (!skipAutoplay) {
+        // Only stop current audio if not doing a seamless transition
+        if (!skipAutoplay && !isSeamlessTransition) {
             stopCurrentAudio(); // Stop previous audio before activating new panel
         }
         
@@ -736,6 +737,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             canNavigate = false;
                             audioCompleted = false;
                             
+                            // For seamless transitions, preload and play immediately
+                            if (isSeamlessTransition) {
+                                audio.preload = 'auto';
+                                audio.load(); // Force load to ensure readiness
+                            }
+                            
                             audio.play().then(() => {
                                 updatePlayButtonState(playButton, audio, true);
                                 if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
@@ -762,17 +769,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                         console.log('Auto-advance enabled, advancing to next panel');
                                         const nextSectionIndex = currentSection + 1;
                                         if (nextSectionIndex < narrativeSections.length) {
-                                            // Update current section
-                                            currentSection = nextSectionIndex;
-                                            
-                                            // Get next section elements
-                                            const nextSection = narrativeSections[nextSectionIndex];
-                                            const nextAudio = nextSection.querySelector('audio');
-                                            const nextButton = nextSection.querySelector('.play-btn');
-                                            
-                                            // Show next section
-                                            scrollToSection(currentSection);
-                                            updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
+                                            // Use requestAnimationFrame for smoother transition timing
+                                            requestAnimationFrame(() => {
+                                                // Seamless transition: prepare next audio immediately
+                                                const nextSection = narrativeSections[nextSectionIndex];
+                                                const nextAudio = nextSection.querySelector('audio');
+                                                
+                                                // Preload next audio for instant playback
+                                                if (nextAudio) {
+                                                    nextAudio.preload = 'auto';
+                                                    nextAudio.load();
+                                                }
+                                                
+                                                // Update current section
+                                                currentSection = nextSectionIndex;
+                                                
+                                                // Show next section with seamless transition
+                                                scrollToSection(currentSection);
+                                                updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
+                                            });
                                         }
                                     }
                                 };
@@ -868,6 +883,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Preload next audio for seamless transitions
+    function preloadNextAudio() {
+        if (autoAdvanceEnabled && currentSection + 1 < narrativeSections.length) {
+            const nextSection = narrativeSections[currentSection + 1];
+            const nextAudio = nextSection.querySelector('audio');
+            if (nextAudio) {
+                nextAudio.preload = 'auto';
+                nextAudio.load();
+                console.log('Preloaded next audio:', nextAudio.src);
+            }
+        }
+    }
+
     // Play audio logic
     function playAudio(audioElement, button, playIcon, playText) {
         console.log('playAudio called for:', audioElement.src);
@@ -878,6 +906,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update global media player
         updateGlobalMediaPlayer(audioElement);
+        
+        // Preload next audio for seamless auto-advance
+        preloadNextAudio();
         
         // Remove any existing onended listeners
         audioElement.onended = null;
@@ -905,24 +936,32 @@ document.addEventListener('DOMContentLoaded', function() {
             // Update navigation buttons to show next button if auto-advance is disabled
             updateNavigationButtons();
             
-            // Auto-advance to next panel only if auto-advance is enabled and not in an ending
-            if (autoAdvanceEnabled && !window.isSleepEnding) {
-                console.log('Auto-advance enabled, advancing to next panel');
-                const nextSectionIndex = currentSection + 1;
-                if (nextSectionIndex < narrativeSections.length) {
-                    // Update current section
-                    currentSection = nextSectionIndex;
-                    
-                    // Get next section elements
-                    const nextSection = narrativeSections[nextSectionIndex];
-                    const nextAudio = nextSection.querySelector('audio');
-                    const nextButton = nextSection.querySelector('.play-btn');
-                    
-                    // Show next section
-                    scrollToSection(currentSection);
-                    updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
-                }
-            }
+                                                // Auto-advance to next panel only if auto-advance is enabled and not in an ending
+                                    if (autoAdvanceEnabled && !window.isSleepEnding) {
+                                        console.log('Auto-advance enabled, advancing to next panel');
+                                        const nextSectionIndex = currentSection + 1;
+                                        if (nextSectionIndex < narrativeSections.length) {
+                                            // Use requestAnimationFrame for smoother transition timing
+                                            requestAnimationFrame(() => {
+                                                // Seamless transition: prepare next audio immediately
+                                                const nextSection = narrativeSections[nextSectionIndex];
+                                                const nextAudio = nextSection.querySelector('audio');
+                                                
+                                                // Preload next audio for instant playback
+                                                if (nextAudio) {
+                                                    nextAudio.preload = 'auto';
+                                                    nextAudio.load();
+                                                }
+                                                
+                                                // Update current section
+                                                currentSection = nextSectionIndex;
+                                                
+                                                // Show next section with seamless transition
+                                                scrollToSection(currentSection);
+                                                updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
+                                            });
+                                        }
+                                    }
         };
         
         // Add timeupdate listener for media player sync

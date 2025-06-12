@@ -3766,6 +3766,27 @@ body {
         margin-bottom: 15px;
     }
 }
+/* Special styles for panels 5 and 6 (first panels after branching) */
+.narrative-section[data-section="5"] .narrative-content,
+.narrative-section[data-section="6"] .narrative-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.narrative-section[data-section="5"] .image-carousel,
+.narrative-section[data-section="6"] .image-carousel {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 @media (min-width: 901px) {
     /* Desktop: keep image panels stuck to the top instead of being centred */
     .narrative-section .narrative-content {

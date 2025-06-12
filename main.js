@@ -416,7 +416,45 @@ document.addEventListener('DOMContentLoaded', function() {
             // Set current section to 5 and use standard navigation logic for autoplay
             currentSection = 5;
             scrollToSection(5);
-            updateActiveNarrativeSection(false, true); // force autoplay
+            
+            // Get the sleep ending section and its audio
+            const sleepSection = document.querySelector('.ending-sleep');
+            if (sleepSection) {
+                sleepSection.style.display = 'flex';
+                sleepSection.classList.add('active');
+                
+                const sleepAudio = sleepSection.querySelector('audio');
+                const playButton = sleepSection.querySelector('.play-btn');
+                
+                if (sleepAudio && playButton) {
+                    currentAudio = sleepAudio;
+                    currentPlayButton = playButton;
+                    updateGlobalMediaPlayer(sleepAudio);
+                    
+                    // Force autoplay for sleep ending
+                    if (audioContextUnlocked) {
+                        audioCompleted = false;
+                        canNavigate = false;
+                        sleepAudio.play().then(() => {
+                            updatePlayButtonState(playButton, sleepAudio, true);
+                            if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
+                            
+                            // Add onended listener for sleep ending
+                            sleepAudio.onended = () => {
+                                console.log('Sleep ending audio completed - showing final page');
+                                updatePlayButtonState(playButton, sleepAudio, false);
+                                if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
+                                showFinalPage();
+                            };
+                        }).catch(error => {
+                            console.error('Error playing sleep ending audio:', error);
+                            updatePlayButtonState(playButton, sleepAudio, false);
+                            if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
+                        });
+                    }
+                }
+            }
+            
             // Now disable auto-advance for sleep branch
             autoAdvanceEnabled = false;
             return;

@@ -446,11 +446,25 @@ document.addEventListener('DOMContentLoaded', function() {
         }
 
         if (targetSection) {
-            targetSection.style.display = 'flex';
+            // Special fix for panels 5 and 6 (ending-sleep and ending-pray)
+            const sectionNum = targetSection.dataset.section;
+            if (sectionNum === '5' || sectionNum === '6') {
+                targetSection.style.position = 'relative';
+                targetSection.style.width = '100vw';
+                targetSection.style.height = '100vh';
+                targetSection.style.display = 'flex';
+                targetSection.style.alignItems = 'center';
+                targetSection.style.justifyContent = 'center';
+            } else {
+                targetSection.style.display = 'flex';
+                // Reset any custom styles in case user navigates back
+                targetSection.style.position = '';
+                targetSection.style.width = '';
+                targetSection.style.height = '';
+                targetSection.style.alignItems = '';
+                targetSection.style.justifyContent = '';
+            }
             targetSection.classList.add('active');
-            targetSection.style.visibility = 'visible';
-            targetSection.style.position = 'relative';
-            targetSection.style.pointerEvents = 'auto';
 
             // --- Ensure play button and audio are set up for this panel ---
             const audio = targetSection.querySelector('audio');
@@ -476,8 +490,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         canNavigate = true;
                         audioCompleted = true;
                         
-                        // For sleep branch, show final page immediately
-                        if (choice === 'sleep') {
+                        // For sleep branch, only show final page after panel 5
+                        if (choice === 'sleep' && targetSection.dataset.section === '5') {
                             console.log('Sleep ending audio completed - showing final page');
                             showFinalPage();
                             return;

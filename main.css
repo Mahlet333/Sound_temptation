@@ -3766,3 +3766,15 @@ body {
         margin-bottom: 15px;
     }
 }
+@media (min-width: 901px) {
+    /* Desktop: keep image panels stuck to the top instead of being centred */
+    .narrative-section .narrative-content {
+        justify-content: flex-start;
+        margin-top: 80px; /* offset for nav bar */
+    }
+
+    /* Desktop: reduce image height so extra controls fit beneath */
+    .image-carousel {
+        max-height: 60vh; /* was 70vh */
+    }
+}

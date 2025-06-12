@@ -837,6 +837,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
         updateStoryBookUIVisibility();
+        updateCarouselArrows();
     }
 
     // Attempt autoplay for chapter audio (if any)
@@ -1650,6 +1651,42 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Add event listeners for video cleanup
     setupVideoCleanup();
+
+    // Add after updateNavigationButtons or in updateActiveNarrativeSection
+    function updateCarouselArrows() {
+        const currentSectionEl = narrativeSections[currentSection];
+        if (!currentSectionEl) return;
+        // Always position prev on left and next on right
+        const prevArrow = currentSectionEl.querySelector('.carousel-arrow-btn.prev');
+        const nextArrow = currentSectionEl.querySelector('.carousel-arrow-btn.next');
+        if (prevArrow) {
+            prevArrow.style.left = '';
+            prevArrow.style.right = '';
+            prevArrow.style.display = '';
+        }
+        if (nextArrow) {
+            nextArrow.style.right = '';
+            nextArrow.style.left = '';
+            if (autoAdvanceEnabled) {
+                nextArrow.style.display = 'none';
+            } else {
+                nextArrow.style.display = '';
+            }
+        }
+    }
+
+    // Call updateCarouselArrows after section changes and after toggling auto-advance
+    const origUpdateActiveNarrativeSection = updateActiveNarrativeSection;
+    updateActiveNarrativeSection = function(...args) {
+        origUpdateActiveNarrativeSection.apply(this, args);
+        updateCarouselArrows();
+    };
+
+    const origToggleAutoAdvanceMode = toggleAutoAdvanceMode;
+    toggleAutoAdvanceMode = function(...args) {
+        origToggleAutoAdvanceMode.apply(this, args);
+        updateCarouselArrows();
+    };
 });
 
 // Mobile Burger Menu Functionality

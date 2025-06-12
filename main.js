@@ -34,6 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let isFastForwardMode = false; // Track fast-forward mode state
     let autoAdvanceEnabled = true; // Track if auto-advance is enabled
     let isRestarting = false; // Track if story is being restarted
+    let isManualNavigation = false; // Add a flag to track manual navigation
 
     // Add fast-forward mode indicator to the DOM
     const fastForwardIndicator = document.createElement('div');
@@ -288,6 +289,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Scroll to top of the page
         window.scrollTo(0, 0);
+        updateStoryBookUIVisibility();
     }
     
     // Update active navigation state
@@ -400,86 +402,52 @@ document.addEventListener('DOMContentLoaded', function() {
             section.classList.remove('active');
         });
 
-        let targetSection;
         if (choice === 'sleep') {
-            targetSection = document.querySelector('.ending-sleep');
             showNotification('He chooses rest over communion...');
-            
-            // Completely hide and disable all panels after sleep ending
+            // Hide pray branch panels
             document.querySelectorAll('.narrative-section').forEach(section => {
                 if (parseInt(section.dataset.section) > 5) {
                     section.style.display = 'none';
                     section.classList.remove('active');
-                    section.style.visibility = 'hidden';
-                    section.style.position = 'absolute';
-                    section.style.pointerEvents = 'none';
-                    
-                    // Disable all navigation buttons
-                    const navButtons = section.querySelectorAll('.nav-btn');
-                    navButtons.forEach(btn => {
-                        btn.style.display = 'none';
-                        btn.disabled = true;
-                        btn.style.visibility = 'hidden';
-                        btn.style.pointerEvents = 'none';
-                    });
                 }
             });
-            
             // Set a flag to prevent auto-advance after sleep ending
             window.isSleepEnding = true;
-            
-            // Disable auto-advance for sleep branch
+            // Set current section to 5 and use standard navigation logic for autoplay
+            currentSection = 5;
+            scrollToSection(5);
+            updateActiveNarrativeSection(false, true); // force autoplay
+            // Now disable auto-advance for sleep branch
             autoAdvanceEnabled = false;
-        } else if (choice === 'pray') {
-            // For pray branch, show panel 6 first
+            return;
+        }
+
+        let targetSection;
+        if (choice === 'pray') {
             targetSection = document.querySelector('.narrative-section[data-section="6"]');
             showNotification('He chooses faith over flesh...');
-            
             // Hide sleep branch panel
             document.querySelectorAll('.narrative-section').forEach(section => {
                 if (section.classList.contains('ending-sleep')) {
                     section.style.display = 'none';
                     section.classList.remove('active');
-                    section.style.visibility = 'hidden';
-                    section.style.position = 'absolute';
-                    section.style.pointerEvents = 'none';
-                    
-                    // Disable navigation buttons
-                    const navButtons = section.querySelectorAll('.nav-btn');
-                    navButtons.forEach(btn => {
-                        btn.style.display = 'none';
-                        btn.disabled = true;
-                        btn.style.visibility = 'hidden';
-                        btn.style.pointerEvents = 'none';
-                    });
                 }
             });
-            
             // Reset sleep ending flag
             window.isSleepEnding = false;
-            
             // Enable auto-advance for pray branch
             autoAdvanceEnabled = true;
         }
 
         if (targetSection) {
-            // Special fix for panels 5 and 6 (ending-sleep and ending-pray)
+            // Special handling for panel 6 as first panel after branching
             const sectionNum = targetSection.dataset.section;
-            if (sectionNum === '5' || sectionNum === '6') {
-                targetSection.style.position = 'relative';
-                targetSection.style.width = '100vw';
-                targetSection.style.height = '100vh';
+            if (sectionNum === '6') {
                 targetSection.style.display = 'flex';
                 targetSection.style.alignItems = 'center';
                 targetSection.style.justifyContent = 'center';
             } else {
                 targetSection.style.display = 'flex';
-                // Reset any custom styles in case user navigates back
-                targetSection.style.position = '';
-                targetSection.style.width = '';
-                targetSection.style.height = '';
-                targetSection.style.alignItems = '';
-                targetSection.style.justifyContent = '';
             }
             targetSection.classList.add('active');
 
@@ -491,51 +459,45 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPlayButton = playButton;
                 updateGlobalMediaPlayer(audio);
                 updatePlayButtonState(playButton, audio, false); // Ensure play button is visible and reset
+                // Force autoplay for pray choice
+                if (audioContextUnlocked) {
+                    audioCompleted = false;
+                    canNavigate = false;
+                    audio.play().then(() => {
+                        updatePlayButtonState(playButton, audio, true);
+                        if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
+                    }).catch(error => {
+                        console.error('Error playing audio:', error);
+                        updatePlayButtonState(playButton, audio, false);
+                        if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
+                    });
+                }
             }
             // --- End setup ---
 
-            // Auto-play if enabled
-            if (audioContextUnlocked) {
-                audio.play().then(() => {
-                    updatePlayButtonState(playButton, audio, true);
-                    if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
-                    
-                    // Add onended listener for auto-advance
-                    audio.onended = () => {
-                        updatePlayButtonState(playButton, audio, false);
-                        if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
-                        canNavigate = true;
-                        audioCompleted = true;
-                        
-                        // For sleep branch, only show final page after panel 5
-                        if (choice === 'sleep' && targetSection.dataset.section === '5') {
-                            console.log('Sleep ending audio completed - showing final page');
-                            showFinalPage();
-                            return;
-                        }
-                        
-                        // For pray branch, only show final page after panel 9
-                        if (choice === 'pray' && targetSection.dataset.section === '9') {
-                            console.log('Pray branch completed - showing final page');
-                            showFinalPage();
-                            return;
-                        }
-                        
-                        // For pray branch, continue to next panel
-                        if (choice === 'pray' && autoAdvanceEnabled) {
-                            const nextSectionIndex = parseInt(targetSection.dataset.section) + 1;
-                            if (nextSectionIndex <= 9) { // Only advance up to panel 9
-                                currentSection = nextSectionIndex;
-                                scrollToSection(currentSection);
-                                updateActiveNarrativeSection(false, true);
-                            }
-                        }
-                    };
-                }).catch(error => {
-                    console.error('Error playing audio:', error);
+            // Add onended listener for auto-advance
+            if (audio) {
+                audio.onended = () => {
                     updatePlayButtonState(playButton, audio, false);
                     if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
-                });
+                    canNavigate = true;
+                    audioCompleted = true;
+                    // For pray branch, only show final page after panel 9
+                    if (targetSection.dataset.section === '9') {
+                        console.log('Pray branch completed - showing final page');
+                        showFinalPage();
+                        return;
+                    }
+                    // For pray branch, continue to next panel
+                    if (autoAdvanceEnabled) {
+                        const nextSectionIndex = parseInt(targetSection.dataset.section) + 1;
+                        if (nextSectionIndex <= 9) { // Only advance up to panel 9
+                            currentSection = nextSectionIndex;
+                            scrollToSection(currentSection);
+                            updateActiveNarrativeSection(false, true);
+                        }
+                    }
+                };
             }
         }
     }
@@ -724,6 +686,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // No scrolling needed since panels are stacked, but keep the rest for compatibility
         // Optionally, scroll to top
         window.scrollTo(0, 0);
+        updateStoryBookUIVisibility();
     }
 
     // Update active narrative section and related states
@@ -835,6 +798,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 section.style.display = 'none';
             }
         });
+        updateStoryBookUIVisibility();
     }
 
     // Attempt autoplay for chapter audio (if any)
@@ -1189,83 +1153,107 @@ document.addEventListener('DOMContentLoaded', function() {
         updateNavigationButtons();
     }
 
-    // Function to navigate between panels (from sounds.html buttons)
-    window.navigatePanel = function(direction) {
-        console.log('navigatePanel called with direction:', direction, 'from section:', currentSection);
+    // Auto-advance to next panel when audio ends
+    function autoAdvanceToNextPanel() {
+        if (!autoAdvanceEnabled) {
+            console.log('Auto-advance is disabled - not advancing to next panel');
+            return;
+        }
         
-        // If we're at the sleep ending, only allow going back to panel 4
+        console.log('Auto-advancing to next panel from section:', currentSection);
+        
         const currentNarrativeSection = narrativeSections[currentSection];
-        if (currentNarrativeSection && currentNarrativeSection.classList.contains('ending-sleep')) {
-            if (direction === 1) {
-                console.log('Preventing forward navigation from sleep ending');
-                showNotification('This is the end of the sleep path. You can only go back to panel 4.');
-                return;
-            }
-            if (direction === -1) {
-                // Only allow going back to panel 4
-                const panel4Index = Array.from(narrativeSections).findIndex(sec => sec.dataset.section === '4');
-                if (panel4Index !== -1) {
-                    currentSection = panel4Index;
-                    scrollToSection(currentSection);
-                    updateActiveNarrativeSection();
-                }
-                return;
-            }
-        }
         
-        // Prevent navigation beyond panel 5 if we're in the sleep path
-        if (currentSection === 4 && direction === 1) {
-            const nextSection = narrativeSections[currentSection + 1];
-            if (nextSection && nextSection.classList.contains('ending-sleep')) {
-                // Allow navigation to sleep ending
-                currentSection = currentSection + direction;
-                scrollToSection(currentSection);
-                updateActiveNarrativeSection();
-                return;
-            }
-        }
-        
-        // Rest of the navigation logic...
-        stopCurrentAudio();
-        
-        // Temporarily hide panel navigation buttons from screen readers during transition
-        document.querySelectorAll('.panel-navigation button').forEach(btn => {
-            btn.setAttribute('aria-hidden', 'true');
-        });
-
-        let newSectionIndex = currentSection + direction;
-
-        // Handle branching choice from Panel 4
-        if (currentNarrativeSection.dataset.section === '4' && direction === 1) {
-            console.log('Branching choice from Panel 4 detected.');
+        // Handle special cases first
+        if (currentNarrativeSection.dataset.section === '4') {
+            // Panel 4 leads to branching choice, don't auto-advance
+            console.log('Panel 4 audio ended - showing branching choice instead of auto-advancing');
             const branchingChoice = currentNarrativeSection.querySelector('.branching-choice');
             if (branchingChoice) {
                 branchingChoice.style.display = 'flex';
             }
             return;
         }
-
-        // Hide branching choice if leaving Panel 4
-        const panel4 = document.querySelector('.narrative-section[data-section="4"]');
-        if (panel4) {
-            const branchingChoice = panel4.querySelector('.branching-choice');
-            if (branchingChoice) {
-                branchingChoice.style.display = 'none';
+        
+        // Check if we're at the end of the story
+        if (currentNarrativeSection.classList.contains('ending-sleep')) {
+            console.log('Reached sleep ending - showing final page');
+            showFinalPage();
+            return;
+        }
+        
+        if (currentNarrativeSection.classList.contains('ending-pray')) {
+            console.log('Reached pray ending - not auto-advancing');
+            return;
+        }
+        
+        // Find next valid section
+        let nextSectionIndex = currentSection + 1;
+        let nextSection = narrativeSections[nextSectionIndex];
+        
+        // Skip hidden sections
+        while (nextSection && nextSection.style.display === 'none') {
+            nextSectionIndex++;
+            if (nextSectionIndex >= narrativeSections.length) {
+                nextSection = null;
+                break;
             }
+            nextSection = narrativeSections[nextSectionIndex];
         }
+        
+        if (nextSection && nextSectionIndex < narrativeSections.length) {
+            console.log('Auto-advancing to section:', nextSectionIndex);
+            
+            // Reset flags for the new section
+            audioCompleted = false;
+            canNavigate = false; // Prevent manual navigation during auto-advance
+            
+            // Navigate to next panel
+            currentSection = nextSectionIndex;
+            scrollToSection(currentSection);
+            updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
+            updateNavigationButtons();
+            
+            // The audio will be handled by updateActiveNarrativeSection with forceAutoplay = true
+            console.log('Auto-advance completed - audio should be playing automatically');
+        } else {
+            console.log('No valid next section found for auto-advance');
+        }
+    }
 
-        // Check if the new section index is valid
+    // Function to navigate between panels (from sounds.html buttons)
+    window.navigatePanel = function(direction) {
+        console.log('navigatePanel called with direction:', direction, 'from section:', currentSection);
+        
+        // Stop any current audio
+        stopCurrentAudio();
+        
+        // Special case: if we're on panel 6 and going back, go to panel 4
+        if (currentSection === 6 && direction === -1) {
+            currentSection = 4;
+            scrollToSection(currentSection);
+            updateActiveNarrativeSection(false, true);
+            updateNavigationButtons();
+            return;
+        }
+        
+        // Calculate new section index
+        let newSectionIndex = currentSection + direction;
+        
+        // Ensure we stay within bounds
         if (newSectionIndex >= 0 && newSectionIndex < narrativeSections.length) {
-            // Use the new navigation handler
-            handlePanelNavigation(newSectionIndex);
+            // Update current section
+            currentSection = newSectionIndex;
+            
+            // Navigate to the new section
+            scrollToSection(currentSection);
+            
+            // Update the active section and play audio
+            updateActiveNarrativeSection(false, true);
+            
+            // Update navigation buttons
+            updateNavigationButtons();
         }
-
-        // Restore accessibility of navigation buttons after transition
-        setTimeout(() => {
-            document.querySelectorAll('.panel-navigation button').forEach(btn => {
-                btn.removeAttribute('aria-hidden');
-            });
-        }, 500);
     };
 
     // --- New Global Volume Control Logic ---
@@ -1429,95 +1417,24 @@ document.addEventListener('DOMContentLoaded', function() {
         return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;
     }
 
-    // Auto-advance to next panel when audio ends
-    function autoAdvanceToNextPanel() {
-        if (!autoAdvanceEnabled) {
-            console.log('Auto-advance is disabled - not advancing to next panel');
-            return;
-        }
-        
-        console.log('Auto-advancing to next panel from section:', currentSection);
-        
-        const currentNarrativeSection = narrativeSections[currentSection];
-        
-        // Handle special cases first
-        if (currentNarrativeSection.dataset.section === '4') {
-            // Panel 4 leads to branching choice, don't auto-advance
-            console.log('Panel 4 audio ended - showing branching choice instead of auto-advancing');
-            const branchingChoice = currentNarrativeSection.querySelector('.branching-choice');
-            if (branchingChoice) {
-                branchingChoice.style.display = 'flex';
-            }
-            return;
-        }
-        
-        // Check if we're at the end of the story
-        if (currentNarrativeSection.classList.contains('ending-sleep')) {
-            console.log('Reached sleep ending - showing final page');
-            showFinalPage();
-            return;
-        }
-        
-        if (currentNarrativeSection.classList.contains('ending-pray')) {
-            console.log('Reached pray ending - not auto-advancing');
-            return;
-        }
-        
-        // Find next valid section
-        let nextSectionIndex = currentSection + 1;
-        let nextSection = narrativeSections[nextSectionIndex];
-        
-        // Skip hidden sections
-        while (nextSection && nextSection.style.display === 'none') {
-            nextSectionIndex++;
-            if (nextSectionIndex >= narrativeSections.length) {
-                nextSection = null;
-                break;
-            }
-            nextSection = narrativeSections[nextSectionIndex];
-        }
-        
-        if (nextSection && nextSectionIndex < narrativeSections.length) {
-            console.log('Auto-advancing to section:', nextSectionIndex);
-            
-            // Reset flags for the new section
-            audioCompleted = false;
-            canNavigate = false; // Prevent manual navigation during auto-advance
-            
-            // Navigate to next panel
-            currentSection = nextSectionIndex;
-            scrollToSection(currentSection);
-            updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
-            updateNavigationButtons();
-            
-            // The audio will be handled by updateActiveNarrativeSection with forceAutoplay = true
-            console.log('Auto-advance completed - audio should be playing automatically');
-        } else {
-            console.log('No valid next section found for auto-advance');
-        }
-    }
-
     // Intersection Observer for active section detection
     const observeElements = () => {
         console.log('Setting up Intersection Observer for narrative sections.');
         const observerOptions = {
-            root: horizontalContainer, // Observe within the scroll container
+            root: horizontalContainer,
             rootMargin: '0px',
-            threshold: 0.7 // Section is active when 70% or more is visible
+            threshold: 0.7
         };
 
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
-                if (entry.isIntersecting && !isRestarting) {
-                    const activeSection = entry.target; // The currently active section
+                if (entry.isIntersecting && !isRestarting && !isManualNavigation) {
+                    const activeSection = entry.target;
                     const sectionIndex = Array.from(narrativeSections).indexOf(activeSection);
                     console.log('Intersection Observer: Section', sectionIndex, 'is intersecting.');
                     if (sectionIndex !== -1 && sectionIndex !== currentSection) {
                         console.log('Intersection Observer: Current section changed to', sectionIndex);
                         currentSection = sectionIndex;
-                        // Manually trigger the navigation logic to handle audio and button states
-                        // This is important for smooth scrolling and keyboard navigation
-                        // stopCurrentAudio(); // Already handled by navigatePanel or direct play
                         const newAudioElement = activeSection.querySelector('audio');
                         const newPlayButton = activeSection.querySelector('.play-btn');
 
@@ -1525,13 +1442,10 @@ document.addEventListener('DOMContentLoaded', function() {
                             console.log('Intersection Observer: Found audio and play button for new active section.');
                             currentAudio = newAudioElement;
                             currentPlayButton = newPlayButton;
-                            updateGlobalMediaPlayer(newAudioElement); // Update global player
+                            updateGlobalMediaPlayer(newAudioElement);
                             
-                            // Only autoplay if auto-advance is disabled or if audio context is unlocked and audio is paused
-                            // This prevents conflicts with auto-advance functionality
                             if (!autoAdvanceEnabled && audioContextUnlocked && newAudioElement.paused) {
                                 console.log('Intersection Observer: Attempting autoplay for new active section (auto-advance disabled).');
-                                // Add a delay to prevent conflicts with screen reader announcements
                                 setTimeout(() => {
                                     playAudio(newAudioElement, newPlayButton, newPlayButton.querySelector('.play-icon'), newPlayButton.querySelector('.play-text'));
                                 }, 300);
@@ -1549,7 +1463,7 @@ document.addEventListener('DOMContentLoaded', function() {
                                 totalTimeDisplay.textContent = '0:00';
                             }
                         }
-                        updateActiveNarrativeSection(); // Update active class for UI
+                        updateActiveNarrativeSection();
                     }
                 }
             });
@@ -1806,4 +1720,18 @@ function setupVideoCleanup() {
     });
     
     console.log('Video cleanup event listeners added');
+}
+
+// Helper function to update visibility of auto-advance indicator and media player
+function updateStoryBookUIVisibility() {
+    // Hide on home panel (currentSection === 0), show otherwise
+    if (typeof currentSection !== 'undefined') {
+        if (currentSection === 0) {
+            if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'none';
+            if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
+        } else {
+            if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'flex';
+            if (globalMediaPlayer) globalMediaPlayer.style.display = 'flex';
+        }
+    }
 }

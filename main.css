@@ -2948,28 +2948,6 @@ body {
     }
 }
 
-<<<<<<< HEAD
-/* Reduce top padding for image carousel in panels 5 and 6 only */
-.narrative-section[data-section="5"] .image-carousel,
-.narrative-section[data-section="6"] .image-carousel {
-    padding-top: 0px !important;
-    margin-top: -300px !important; /* Maximum pull to nav bar */
-    width: 80% !important;
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.narrative-section[data-section="5"],
-.narrative-section[data-section="6"] {
-    padding-top: 0 !important;
-}
-
-.narrative-section[data-section="5"] .narrative-content,
-.narrative-section[data-section="6"] .narrative-content {
-    padding-top: 0 !important;
-    justify-content: flex-start !important;
-}
-=======
 /* ==========================================================================
    Video Overlay Styles
    ========================================================================== */
@@ -3771,4 +3749,24 @@ body {
         margin-bottom: 15px;
     }
 }
->>>>>>> origin/Update
+
+/* Special styles for panels 5 and 6 (first panels after branching) */
+.narrative-section[data-section="5"] .narrative-content,
+.narrative-section[data-section="6"] .narrative-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 100vh;
+    padding: 2rem;
+}
+
+.narrative-section[data-section="5"] .image-carousel,
+.narrative-section[data-section="6"] .image-carousel {
+    width: 100%;
+    max-width: 1200px;
+    margin: 0 auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}

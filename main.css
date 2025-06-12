@@ -2927,3 +2927,24 @@ body {
         transform: translateY(0);
     }
 }
+
+/* Reduce top padding for image carousel in panels 5 and 6 only */
+.narrative-section[data-section="5"] .image-carousel,
+.narrative-section[data-section="6"] .image-carousel {
+    padding-top: 0px !important;
+    margin-top: -96px !important; /* Pull image much closer to nav bar */
+    width: 80% !important;        /* Further decrease width for best match */
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.narrative-section[data-section="5"],
+.narrative-section[data-section="6"] {
+    padding-top: 0 !important;
+}
+
+.narrative-section[data-section="5"] .narrative-content,
+.narrative-section[data-section="6"] .narrative-content {
+    padding-top: 0 !important;
+    justify-content: flex-start !important;
+}

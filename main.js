@@ -390,18 +390,16 @@ document.addEventListener('DOMContentLoaded', function() {
         // Show notification
         showNotification('The story has ended. You can restart to explore the other path.');
     };
-
-    // Handle user choice
     function handleChoice(choice) {
         console.log('Handling choice:', choice);
         stopCurrentAudio();
-
-        // Hide all narrative sections before showing the target
+    
+        // Hide all narrative sections and remove active class
         document.querySelectorAll('.narrative-section').forEach(section => {
             section.style.display = 'none';
             section.classList.remove('active');
         });
-
+    
         if (choice === 'sleep') {
             showNotification('He chooses rest over communion...');
             // Hide pray branch panels
@@ -411,13 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     section.classList.remove('active');
                 }
             });
-            // Set a flag to prevent auto-advance after sleep ending
             window.isSleepEnding = true;
-            // Set current section to 5 and use standard navigation logic for autoplay
             currentSection = 5;
             scrollToSection(5);
             
-            // Get the sleep ending section and its audio
             const sleepSection = document.querySelector('.ending-sleep');
             if (sleepSection) {
                 sleepSection.style.display = 'flex';
@@ -431,7 +426,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     currentPlayButton = playButton;
                     updateGlobalMediaPlayer(sleepAudio);
                     
-                    // Force autoplay for sleep ending
                     if (audioContextUnlocked) {
                         audioCompleted = false;
                         canNavigate = false;
@@ -439,7 +433,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             updatePlayButtonState(playButton, sleepAudio, true);
                             if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
                             
-                            // Add onended listener for sleep ending
                             sleepAudio.onended = () => {
                                 console.log('Sleep ending audio completed - showing final page');
                                 updatePlayButtonState(playButton, sleepAudio, false);
@@ -455,11 +448,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
-            // Now disable auto-advance for sleep branch
             autoAdvanceEnabled = false;
             return;
         }
-
+    
         let targetSection;
         if (choice === 'pray') {
             targetSection = document.querySelector('.narrative-section[data-section="6"]');
@@ -471,33 +463,37 @@ document.addEventListener('DOMContentLoaded', function() {
                     section.classList.remove('active');
                 }
             });
-            // Reset sleep ending flag
             window.isSleepEnding = false;
-            // Enable auto-advance for pray branch
             autoAdvanceEnabled = true;
         }
-
+    
         if (targetSection) {
-            // Special handling for panel 6 as first panel after branching
-            const sectionNum = targetSection.dataset.section;
-            if (sectionNum === '6') {
-                targetSection.style.display = 'flex';
-                targetSection.style.alignItems = 'center';
-                targetSection.style.justifyContent = 'center';
-            } else {
-                targetSection.style.display = 'flex';
-            }
+            // Rely on CSS for display and flex properties
+            targetSection.style.display = 'flex';
             targetSection.classList.add('active');
-
-            // --- Ensure play button and audio are set up for this panel ---
+            currentSection = parseInt(targetSection.dataset.section);
+    
+            // Reset story-image styles to ensure consistency
+            const storyImage = targetSection.querySelector('.story-image');
+            if (storyImage) {
+                storyImage.style.width = '';
+                storyImage.style.height = '';
+                storyImage.style.transform = '';
+                // Force layout reflow
+                storyImage.offsetHeight; // Trigger reflow
+            }
+    
+            // Scroll to section
+            scrollToSection(currentSection);
+    
             const audio = targetSection.querySelector('audio');
             const playButton = targetSection.querySelector('.play-btn');
             if (audio && playButton) {
                 currentAudio = audio;
                 currentPlayButton = playButton;
                 updateGlobalMediaPlayer(audio);
-                updatePlayButtonState(playButton, audio, false); // Ensure play button is visible and reset
-                // Force autoplay for pray choice
+                updatePlayButtonState(playButton, audio, false);
+                
                 if (audioContextUnlocked) {
                     audioCompleted = false;
                     canNavigate = false;
@@ -511,25 +507,21 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
                 }
             }
-            // --- End setup ---
-
-            // Add onended listener for auto-advance
+    
             if (audio) {
                 audio.onended = () => {
                     updatePlayButtonState(playButton, audio, false);
                     if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '▶';
                     canNavigate = true;
                     audioCompleted = true;
-                    // For pray branch, only show final page after panel 9
                     if (targetSection.dataset.section === '9') {
                         console.log('Pray branch completed - showing final page');
                         showFinalPage();
                         return;
                     }
-                    // For pray branch, continue to next panel
                     if (autoAdvanceEnabled) {
                         const nextSectionIndex = parseInt(targetSection.dataset.section) + 1;
-                        if (nextSectionIndex <= 9) { // Only advance up to panel 9
+                        if (nextSectionIndex <= 9) {
                             currentSection = nextSectionIndex;
                             scrollToSection(currentSection);
                             updateActiveNarrativeSection(false, true);
@@ -744,6 +736,19 @@ document.addEventListener('DOMContentLoaded', function() {
             if (index === currentSection) {
                 section.classList.add('active');
                 section.style.display = 'flex';
+                
+                // Hide media player and auto-advance indicator for home section or if no audio
+                const globalMediaPlayer = document.getElementById('globalMediaPlayer');
+                const autoAdvanceIndicator = document.querySelector('.auto-advance-mode');
+                const audio = section.querySelector('audio');
+                if ((currentSection === 0 || section.classList.contains('home-section')) || !audio) {
+                    if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
+                    if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'none';
+                    updateGlobalMediaPlayer(null);
+                    return;
+                } else {
+                    if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'flex';
+                }
                 
                 // Hide branching choice initially for panel 4
                 if (section.dataset.section === '4') {
@@ -1007,7 +1012,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add timeupdate listener for media player sync
         audioElement.ontimeupdate = () => {
             if (globalSeekSlider) {
-                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                const duration = audioElement.duration;
+                const progress = (duration && Number.isFinite(duration) && duration > 0)
+                    ? (audioElement.currentTime / duration) * 100
+                    : 0;
                 globalSeekSlider.value = progress;
             }
             if (currentTimeDisplay) {
@@ -1331,27 +1339,28 @@ document.addEventListener('DOMContentLoaded', function() {
 
         globalPlayPauseBtn.addEventListener('click', () => {
             console.log('Global play/pause button clicked.');
-            if (currentAudio) {
-                if (currentAudio.paused) {
-                    console.log('Global player: current audio paused, attempting to play.');
-                    currentAudio.play().then(() => {
-                        updatePlayButtonState(currentPlayButton, currentAudio, true);
-                    }).catch(error => {
-                        console.error('Error playing audio:', error);
-                        showNotification('Error playing audio. Please try again.');
-                    });
-                } else {
-                    console.log('Global player: current audio playing, attempting to pause.');
-                    currentAudio.pause();
-                    updatePlayButtonState(currentPlayButton, currentAudio, false);
-                }
+            if (!currentAudio) {
+                showNotification('Nothing to play here yet... Dare to click "Face Your Temptation" and let the story begin!');
+                globalMediaPlayer.style.display = 'none';
+                return;
+            }
+            if (currentAudio.paused) {
+                console.log('Global player: current audio paused, attempting to play.');
+                currentAudio.play().then(() => {
+                    updatePlayButtonState(currentPlayButton, currentAudio, true);
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    showNotification('Error playing audio. Please try again.');
+                });
             } else {
-                console.log('Global player: No current audio to play/pause.');
+                console.log('Global player: current audio playing, attempting to pause.');
+                currentAudio.pause();
+                updatePlayButtonState(currentPlayButton, currentAudio, false);
             }
         });
 
         globalSeekSlider.addEventListener('input', () => {
-            if (currentAudio) {
+            if (currentAudio && Number.isFinite(currentAudio.duration) && currentAudio.duration > 0) {
                 const seekTime = (globalSeekSlider.value / 100) * currentAudio.duration;
                 currentAudio.currentTime = seekTime;
             }
@@ -1370,7 +1379,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('audio').forEach(audioElement => {
             audioElement.addEventListener('timeupdate', () => {
                 if (audioElement === currentAudio) {
-                    const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                    const duration = audioElement.duration;
+                    const progress = (duration && Number.isFinite(duration) && duration > 0)
+                        ? (audioElement.currentTime / duration) * 100
+                        : 0;
                     globalSeekSlider.value = progress;
                     currentTimeDisplay.textContent = formatTime(audioElement.currentTime);
                     // console.log('Time update for:', audioElement.src, 'Time:', audioElement.currentTime);
@@ -1418,7 +1430,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update the updateGlobalMediaPlayer function
     function updateGlobalMediaPlayer(audio) {
-        if (!audio) return;
+        const globalMediaPlayer = document.getElementById('globalMediaPlayer');
+        if (!audio) {
+            if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
+            if (currentTimeDisplay) currentTimeDisplay.textContent = '0:00';
+            if (totalTimeDisplay) totalTimeDisplay.textContent = '0:00';
+            return;
+        }
         
         // Update total time display
         if (totalTimeDisplay) {
@@ -1455,8 +1473,13 @@ document.addEventListener('DOMContentLoaded', function() {
         audio.dispatchEvent(event);
     }
 
-    // Helper to format time
+    // Updated helper to format time that safely handles NaN or Infinity values
     function formatTime(seconds) {
+        // Guard against NaN, Infinity or negative values that would otherwise render "NaN:NaN"
+        if (!Number.isFinite(seconds) || seconds < 0) {
+            return '0:00';
+        }
+
         const minutes = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;

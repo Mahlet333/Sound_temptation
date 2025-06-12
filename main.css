@@ -2932,8 +2932,8 @@ body {
 .narrative-section[data-section="5"] .image-carousel,
 .narrative-section[data-section="6"] .image-carousel {
     padding-top: 0px !important;
-    margin-top: -96px !important; /* Pull image much closer to nav bar */
-    width: 80% !important;        /* Further decrease width for best match */
+    margin-top: -200px !important; /* Aggressively pull image closer to nav bar */
+    width: 80% !important;
     margin-left: auto;
     margin-right: auto;
 }

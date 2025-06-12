@@ -737,6 +737,18 @@ document.addEventListener('DOMContentLoaded', function() {
                 section.classList.add('active');
                 section.style.display = 'flex';
                 
+                // Hide media player and auto-advance indicator for home section
+                const globalMediaPlayer = document.getElementById('globalMediaPlayer');
+                const autoAdvanceIndicator = document.querySelector('.auto-advance-mode');
+                if ((currentSection === 0 || section.classList.contains('home-section'))) {
+                    if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
+                    if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'none';
+                    updateGlobalMediaPlayer(null);
+                    return;
+                } else {
+                    if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'flex';
+                }
+                
                 // Hide branching choice initially for panel 4
                 if (section.dataset.section === '4') {
                     section.classList.remove('blurred');

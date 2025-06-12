@@ -162,6 +162,9 @@ document.addEventListener('DOMContentLoaded', function() {
         initializeSoundsSection();
     }
 
+    // Setup video overlay functionality globally
+    setupVideoOverlay();
+
     // --- Navigation (Global) ---
     navItems.forEach(item => {
         item.addEventListener('click', function() {
@@ -208,6 +211,12 @@ document.addEventListener('DOMContentLoaded', function() {
                 }
             }
             
+            // Pause YouTube video when leaving behind-scenes section
+            const currentActiveSection = document.querySelector('.section.active');
+            if (currentActiveSection && currentActiveSection.id === 'behind-scenes' && targetId !== 'behind-scenes') {
+                pauseYouTubeVideo();
+            }
+            
             // Add click feedback
             this.style.transform = 'translateY(-2px) scale(0.95)';
             setTimeout(() => {
@@ -228,6 +237,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // Show specific section
     function showSection(targetId) {
         console.log('Showing section:', targetId);
+        
+        // Pause YouTube video when leaving behind-scenes section
+        const currentActiveSection = document.querySelector('.section.active');
+        if (currentActiveSection && currentActiveSection.id === 'behind-scenes' && targetId !== 'behind-scenes') {
+            pauseYouTubeVideo();
+        }
+        
         sections.forEach(section => {
             if (section.id === targetId) {
                 section.classList.add('active');
@@ -294,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
         setupBranchingChoice();
         setupAudioUnlock();
         setupGlobalMediaPlayer(); // Initialize global media player
+        setupVideoOverlay(); // Initialize video overlay functionality
     }
 
     // Setup audio unlock functionality
@@ -710,10 +727,11 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Update active narrative section and related states
-    function updateActiveNarrativeSection(skipAutoplay = false, forceAutoplay = false) {
-        console.log('Updating active narrative section. Current section:', currentSection, 'skipAutoplay:', skipAutoplay, 'forceAutoplay:', forceAutoplay);
+    function updateActiveNarrativeSection(skipAutoplay = false, forceAutoplay = false, isSeamlessTransition = false) {
+        console.log('Updating active narrative section. Current section:', currentSection, 'skipAutoplay:', skipAutoplay, 'forceAutoplay:', forceAutoplay, 'isSeamlessTransition:', isSeamlessTransition);
         
-        if (!skipAutoplay) {
+        // Only stop current audio if not doing a seamless transition
+        if (!skipAutoplay && !isSeamlessTransition) {
             stopCurrentAudio(); // Stop previous audio before activating new panel
         }
         
@@ -750,6 +768,12 @@ document.addEventListener('DOMContentLoaded', function() {
                             canNavigate = false;
                             audioCompleted = false;
                             
+                            // For seamless transitions, preload and play immediately
+                            if (isSeamlessTransition) {
+                                audio.preload = 'auto';
+                                audio.load(); // Force load to ensure readiness
+                            }
+                            
                             audio.play().then(() => {
                                 updatePlayButtonState(playButton, audio, true);
                                 if (globalPlayPauseBtn) globalPlayPauseBtn.textContent = '⏸';
@@ -776,17 +800,25 @@ document.addEventListener('DOMContentLoaded', function() {
                                         console.log('Auto-advance enabled, advancing to next panel');
                                         const nextSectionIndex = currentSection + 1;
                                         if (nextSectionIndex < narrativeSections.length) {
-                                            // Update current section
-                                            currentSection = nextSectionIndex;
-                                            
-                                            // Get next section elements
+                                            // Use requestAnimationFrame for smoother transition timing
+                                            requestAnimationFrame(() => {
+                                                // Seamless transition: prepare next audio immediately
                                             const nextSection = narrativeSections[nextSectionIndex];
                                             const nextAudio = nextSection.querySelector('audio');
-                                            const nextButton = nextSection.querySelector('.play-btn');
+                                                
+                                                // Preload next audio for instant playback
+                                                if (nextAudio) {
+                                                    nextAudio.preload = 'auto';
+                                                    nextAudio.load();
+                                                }
+                                                
+                                                // Update current section
+                                                currentSection = nextSectionIndex;
                                             
-                                            // Show next section
+                                                // Show next section with seamless transition
                                             scrollToSection(currentSection);
-                                            updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
+                                                updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
+                                            });
                                         }
                                     }
                                 };
@@ -882,6 +914,19 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    // Preload next audio for seamless transitions
+    function preloadNextAudio() {
+        if (autoAdvanceEnabled && currentSection + 1 < narrativeSections.length) {
+            const nextSection = narrativeSections[currentSection + 1];
+            const nextAudio = nextSection.querySelector('audio');
+            if (nextAudio) {
+                nextAudio.preload = 'auto';
+                nextAudio.load();
+                console.log('Preloaded next audio:', nextAudio.src);
+            }
+        }
+    }
+
     // Play audio logic
     function playAudio(audioElement, button, playIcon, playText) {
         console.log('playAudio called for:', audioElement.src);
@@ -892,6 +937,9 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // Update global media player
         updateGlobalMediaPlayer(audioElement);
+        
+        // Preload next audio for seamless auto-advance
+        preloadNextAudio();
         
         // Remove any existing onended listeners
         audioElement.onended = null;
@@ -924,17 +972,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 console.log('Auto-advance enabled, advancing to next panel');
                 const nextSectionIndex = currentSection + 1;
                 if (nextSectionIndex < narrativeSections.length) {
-                    // Update current section
-                    currentSection = nextSectionIndex;
-                    
-                    // Get next section elements
+                                            // Use requestAnimationFrame for smoother transition timing
+                                            requestAnimationFrame(() => {
+                                                // Seamless transition: prepare next audio immediately
                     const nextSection = narrativeSections[nextSectionIndex];
                     const nextAudio = nextSection.querySelector('audio');
-                    const nextButton = nextSection.querySelector('.play-btn');
+                                                
+                                                // Preload next audio for instant playback
+                                                if (nextAudio) {
+                                                    nextAudio.preload = 'auto';
+                                                    nextAudio.load();
+                                                }
+                                                
+                                                // Update current section
+                                                currentSection = nextSectionIndex;
                     
-                    // Show next section
+                                                // Show next section with seamless transition
                     scrollToSection(currentSection);
-                    updateActiveNarrativeSection(false, true); // forceAutoplay = true for auto-advance
+                                                updateActiveNarrativeSection(false, true, true); // isSeamlessTransition = true
+                                            });
                 }
             }
         };
@@ -1579,33 +1635,175 @@ document.addEventListener('DOMContentLoaded', function() {
         triggerBtn.addEventListener('click', showFirstPanel);
     }
 
-    // Add auto-advance toggle button to the UI
+    // Auto-advance toggle functionality is now handled by the existing autoAdvanceIndicator
     function setupAutoAdvanceToggle() {
-        const volumeControlContainer = document.getElementById('volumeControlContainer');
-        if (volumeControlContainer) {
-            const autoAdvanceToggle = document.createElement('button');
-            autoAdvanceToggle.id = 'autoAdvanceToggle';
-            autoAdvanceToggle.className = 'auto-advance-toggle';
-            autoAdvanceToggle.innerHTML = `
-                <span class="toggle-icon">⏭️</span>
-                <span class="toggle-text">Auto-Advance: ON</span>
-            `;
-            autoAdvanceToggle.title = 'Toggle auto-advance';
+        // This function is no longer needed - auto-advance toggle is handled by autoAdvanceIndicator
+        console.log('Auto-advance toggle handled by existing autoAdvanceIndicator in top right');
+    }
+
+    // Setup video overlay functionality
+    function setupVideoOverlay() {
+        const videoOverlay = document.getElementById('videoOverlay');
+        const videoPlayBtn = document.getElementById('videoPlayBtn');
+        const youtubeVideo = document.getElementById('youtubeVideo');
+        
+        if (videoOverlay && videoPlayBtn && youtubeVideo) {
+            // Add click event to overlay and play button
+            const handleVideoClick = () => {
+                console.log('Video overlay clicked - showing YouTube video');
+                
+                // Hide overlay with animation
+                videoOverlay.classList.add('hidden');
+                
+                // Show YouTube video after overlay fades out
+                setTimeout(() => {
+                    videoOverlay.style.display = 'none';
+                    youtubeVideo.style.display = 'block';
+                    
+                    // Update iframe src to enable autoplay
+                    const currentSrc = youtubeVideo.src;
+                    if (!currentSrc.includes('autoplay=1')) {
+                        const separator = currentSrc.includes('?') ? '&' : '?';
+                        youtubeVideo.src = currentSrc + separator + 'autoplay=1&rel=0';
+                    }
+                    
+                    // Ensure video is properly sized
+                    youtubeVideo.style.width = '100%';
+                    youtubeVideo.style.height = '100%';
+                    
+                    console.log('YouTube video is now visible and should be playing');
+                }, 300);
+            };
             
-            autoAdvanceToggle.addEventListener('click', () => {
-                autoAdvanceEnabled = !autoAdvanceEnabled;
-                const toggleText = autoAdvanceToggle.querySelector('.toggle-text');
-                toggleText.textContent = `Auto-Advance: ${autoAdvanceEnabled ? 'ON' : 'OFF'}`;
-                showNotification(`Auto-advance ${autoAdvanceEnabled ? 'enabled' : 'disabled'}`);
+            videoOverlay.addEventListener('click', handleVideoClick);
+            videoPlayBtn.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent double-triggering
+                handleVideoClick();
             });
             
-            volumeControlContainer.appendChild(autoAdvanceToggle);
+            console.log('Video overlay functionality setup complete');
+        } else {
+            console.log('Video overlay elements not found');
         }
     }
 
-    // Call setup function when document is ready
-    document.addEventListener('DOMContentLoaded', () => {
+    // Setup auto-advance toggle
         setupAutoAdvanceToggle();
-        // ... rest of your initialization code ...
-    });
+
+    // Setup video overlay
+    setupVideoOverlay();
+    
+    // Setup mobile burger menu
+    setupBurgerMenu();
+
+    // Add event listeners for video cleanup
+    setupVideoCleanup();
 });
+
+// Mobile Burger Menu Functionality
+function setupBurgerMenu() {
+    const navBurger = document.getElementById('navBurger');
+    const navItems = document.getElementById('navItems');
+    
+    if (!navBurger || !navItems) {
+        console.log('Burger menu elements not found');
+        return;
+    }
+    
+    // Toggle mobile menu
+    navBurger.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        
+        navBurger.classList.toggle('active');
+        navItems.classList.toggle('active');
+        
+        // Prevent body scroll when menu is open
+        if (navItems.classList.contains('active')) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu when clicking on a nav item
+    const navItemElements = navItems.querySelectorAll('.nav-item');
+    navItemElements.forEach(item => {
+        item.addEventListener('click', () => {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        });
+    });
+    
+    // Close menu when clicking outside
+    document.addEventListener('click', (e) => {
+        if (navItems.classList.contains('active') && 
+            !navItems.contains(e.target) && 
+            !navBurger.contains(e.target)) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Close menu on window resize if desktop view
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    // Handle escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && navItems.classList.contains('active')) {
+            navBurger.classList.remove('active');
+            navItems.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+    
+    console.log('Burger menu setup complete');
+}
+
+// Function to pause/stop YouTube video
+function pauseYouTubeVideo() {
+    const youtubeVideo = document.getElementById('youtubeVideo');
+    const videoOverlay = document.getElementById('videoOverlay');
+    
+    if (youtubeVideo && videoOverlay) {
+        console.log('Pausing YouTube video');
+        
+        // Hide the video and show overlay again
+        youtubeVideo.style.display = 'none';
+        videoOverlay.classList.remove('hidden');
+        
+        // Reset the video src to stop playback completely
+        const originalSrc = youtubeVideo.src.split('?')[0]; // Remove query parameters
+        youtubeVideo.src = originalSrc;
+        
+        console.log('YouTube video paused and reset');
+    }
+}
+
+// Setup video cleanup event listeners
+function setupVideoCleanup() {
+    // Pause video when page is about to unload
+    window.addEventListener('beforeunload', () => {
+        pauseYouTubeVideo();
+    });
+    
+    // Pause video when page visibility changes (user switches tabs)
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            const currentActiveSection = document.querySelector('.section.active');
+            if (currentActiveSection && currentActiveSection.id === 'behind-scenes') {
+                pauseYouTubeVideo();
+            }
+        }
+    });
+    
+    console.log('Video cleanup event listeners added');
+}

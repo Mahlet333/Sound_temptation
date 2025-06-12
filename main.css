@@ -2322,13 +2322,47 @@ body {
         transform: none;
         justify-content: center;
         margin-top: 10px;
+        margin-bottom: 80px; /* Add space above bottom controls */
         padding: 0;
+        z-index: 100;
     }
 
     .nav-btn {
         padding: 8px 15px;
         font-size: 0.8rem;
     }
+}
+
+@media (max-width: 600px) {
+  .panel-navigation {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100%;
+    transform: none !important;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 80px; /* Add space above bottom controls */
+    padding: 0;
+    z-index: 100;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-navigation {
+    position: static !important;
+    bottom: auto !important;
+    left: auto !important;
+    right: auto !important;
+    width: 100%;
+    transform: none !important;
+    justify-content: center;
+    margin-top: 10px;
+    margin-bottom: 80px; /* Add space above bottom controls */
+    padding: 0;
+    z-index: 100;
+  }
 }
 
 /* ==========================================================================
@@ -3836,5 +3870,154 @@ body {
   }
   #globalMediaPlayer {
     bottom: 10px;
+  }
+}
+
+@media (max-width: 900px) {
+  .panel-navigation {
+    display: none !important;
+  }
+  .image-carousel {
+    position: relative;
+  }
+  .carousel-arrow-btn {
+    position: absolute;
+    bottom: 10px;
+    width: 44px;
+    height: 44px;
+    border-radius: 50% !important;
+    background: rgba(0,0,0,0.7);
+    color: #fff;
+    border: 1px solid #fff;
+    font-size: 1.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 20;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+  }
+  .carousel-arrow-btn:active {
+    background: #222;
+    transform: scale(0.95);
+  }
+  .carousel-arrow-btn.prev {
+    left: 10px;
+  }
+  .carousel-arrow-btn.next {
+    right: 10px;
+  }
+}
+
+@media (max-width: 600px) {
+  .panel-navigation {
+    display: none !important;
+  }
+  .image-carousel {
+    position: relative;
+  }
+  .carousel-arrow-btn {
+    position: absolute;
+    bottom: 8px;
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    border-radius: 50% !important;
+  }
+  .carousel-arrow-btn.prev {
+    left: 8px;
+  }
+  .carousel-arrow-btn.next {
+    right: 8px;
+  }
+}
+
+@media (max-width: 480px) {
+  .carousel-arrow-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    bottom: 6px;
+    border-radius: 50% !important;
+  }
+  .carousel-arrow-btn.prev {
+    left: 6px;
+  }
+  .carousel-arrow-btn.next {
+    right: 6px;
+  }
+}
+
+.carousel-arrow-btn {
+  border-radius: 50% !important;
+  width: 48px;
+  height: 48px;
+  background: rgba(0,0,0,0.7);
+  color: #fff;
+  border: 2px solid #fff;
+  font-size: 1.7rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 20;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+  cursor: pointer;
+  transition: background 0.2s, transform 0.2s;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.carousel-arrow-btn.prev {
+  left: 16px;
+}
+.carousel-arrow-btn.next {
+  right: 16px;
+}
+@media (max-width: 900px) {
+  .carousel-arrow-btn {
+    bottom: 10px;
+    top: auto;
+    left: auto;
+    right: auto;
+    width: 44px;
+    height: 44px;
+    font-size: 1.5rem;
+    border-radius: 50% !important;
+    transform: none;
+  }
+  .carousel-arrow-btn.prev {
+    left: 10px;
+  }
+  .carousel-arrow-btn.next {
+    right: 10px;
+  }
+}
+@media (max-width: 600px) {
+  .carousel-arrow-btn {
+    width: 40px;
+    height: 40px;
+    font-size: 1.3rem;
+    border-radius: 50% !important;
+  }
+  .carousel-arrow-btn.prev {
+    left: 8px;
+  }
+  .carousel-arrow-btn.next {
+    right: 8px;
+  }
+}
+@media (max-width: 480px) {
+  .carousel-arrow-btn {
+    width: 36px;
+    height: 36px;
+    font-size: 1.1rem;
+    border-radius: 50% !important;
+  }
+  .carousel-arrow-btn.prev {
+    left: 6px;
+  }
+  .carousel-arrow-btn.next {
+    right: 6px;
   }
 }

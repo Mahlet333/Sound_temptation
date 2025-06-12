@@ -1007,7 +1007,10 @@ document.addEventListener('DOMContentLoaded', function() {
         // Add timeupdate listener for media player sync
         audioElement.ontimeupdate = () => {
             if (globalSeekSlider) {
-                const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                const duration = audioElement.duration;
+                const progress = (duration && Number.isFinite(duration) && duration > 0)
+                    ? (audioElement.currentTime / duration) * 100
+                    : 0;
                 globalSeekSlider.value = progress;
             }
             if (currentTimeDisplay) {
@@ -1351,7 +1354,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         globalSeekSlider.addEventListener('input', () => {
-            if (currentAudio) {
+            if (currentAudio && Number.isFinite(currentAudio.duration) && currentAudio.duration > 0) {
                 const seekTime = (globalSeekSlider.value / 100) * currentAudio.duration;
                 currentAudio.currentTime = seekTime;
             }
@@ -1370,7 +1373,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.querySelectorAll('audio').forEach(audioElement => {
             audioElement.addEventListener('timeupdate', () => {
                 if (audioElement === currentAudio) {
-                    const progress = (audioElement.currentTime / audioElement.duration) * 100;
+                    const duration = audioElement.duration;
+                    const progress = (duration && Number.isFinite(duration) && duration > 0)
+                        ? (audioElement.currentTime / duration) * 100
+                        : 0;
                     globalSeekSlider.value = progress;
                     currentTimeDisplay.textContent = formatTime(audioElement.currentTime);
                     // console.log('Time update for:', audioElement.src, 'Time:', audioElement.currentTime);
@@ -1455,8 +1461,13 @@ document.addEventListener('DOMContentLoaded', function() {
         audio.dispatchEvent(event);
     }
 
-    // Helper to format time
+    // Updated helper to format time that safely handles NaN or Infinity values
     function formatTime(seconds) {
+        // Guard against NaN, Infinity or negative values that would otherwise render "NaN:NaN"
+        if (!Number.isFinite(seconds) || seconds < 0) {
+            return '0:00';
+        }
+
         const minutes = Math.floor(seconds / 60);
         const secs = Math.floor(seconds % 60);
         return `${minutes}:${secs < 10 ? '0' : ''}${secs}`;

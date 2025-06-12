@@ -737,10 +737,11 @@ document.addEventListener('DOMContentLoaded', function() {
                 section.classList.add('active');
                 section.style.display = 'flex';
                 
-                // Hide media player and auto-advance indicator for home section
+                // Hide media player and auto-advance indicator for home section or if no audio
                 const globalMediaPlayer = document.getElementById('globalMediaPlayer');
                 const autoAdvanceIndicator = document.querySelector('.auto-advance-mode');
-                if ((currentSection === 0 || section.classList.contains('home-section'))) {
+                const audio = section.querySelector('audio');
+                if ((currentSection === 0 || section.classList.contains('home-section')) || !audio) {
                     if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
                     if (autoAdvanceIndicator) autoAdvanceIndicator.style.display = 'none';
                     updateGlobalMediaPlayer(null);
@@ -1338,22 +1339,23 @@ document.addEventListener('DOMContentLoaded', function() {
 
         globalPlayPauseBtn.addEventListener('click', () => {
             console.log('Global play/pause button clicked.');
-            if (currentAudio) {
-                if (currentAudio.paused) {
-                    console.log('Global player: current audio paused, attempting to play.');
-                    currentAudio.play().then(() => {
-                        updatePlayButtonState(currentPlayButton, currentAudio, true);
-                    }).catch(error => {
-                        console.error('Error playing audio:', error);
-                        showNotification('Error playing audio. Please try again.');
-                    });
-                } else {
-                    console.log('Global player: current audio playing, attempting to pause.');
-                    currentAudio.pause();
-                    updatePlayButtonState(currentPlayButton, currentAudio, false);
-                }
+            if (!currentAudio) {
+                showNotification('Nothing to play here yet... Dare to click "Face Your Temptation" and let the story begin!');
+                globalMediaPlayer.style.display = 'none';
+                return;
+            }
+            if (currentAudio.paused) {
+                console.log('Global player: current audio paused, attempting to play.');
+                currentAudio.play().then(() => {
+                    updatePlayButtonState(currentPlayButton, currentAudio, true);
+                }).catch(error => {
+                    console.error('Error playing audio:', error);
+                    showNotification('Error playing audio. Please try again.');
+                });
             } else {
-                console.log('Global player: No current audio to play/pause.');
+                console.log('Global player: current audio playing, attempting to pause.');
+                currentAudio.pause();
+                updatePlayButtonState(currentPlayButton, currentAudio, false);
             }
         });
 
@@ -1428,7 +1430,13 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Update the updateGlobalMediaPlayer function
     function updateGlobalMediaPlayer(audio) {
-        if (!audio) return;
+        const globalMediaPlayer = document.getElementById('globalMediaPlayer');
+        if (!audio) {
+            if (globalMediaPlayer) globalMediaPlayer.style.display = 'none';
+            if (currentTimeDisplay) currentTimeDisplay.textContent = '0:00';
+            if (totalTimeDisplay) totalTimeDisplay.textContent = '0:00';
+            return;
+        }
         
         // Update total time display
         if (totalTimeDisplay) {

@@ -4021,3 +4021,41 @@ body {
     right: 6px;
   }
 }
+
+@media (min-width: 901px) {
+  .narrative-section[data-section="4"].blurred .image-carousel img {
+    filter: blur(8px) brightness(0.7);
+    transition: filter 0.4s;
+  }
+  .narrative-section[data-section="4"].blurred .branching-choice {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 30;
+    width: 80%;
+    max-width: 500px;
+    background: rgba(0,0,0,0.85);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+    border-radius: 12px;
+    padding: 40px 30px;
+    display: flex !important;
+    flex-direction: column;
+    align-items: center;
+    animation: fadeInUp 0.7s;
+  }
+  .narrative-section[data-section="4"].blurred .narrative-content {
+    position: relative;
+  }
+  .narrative-section[data-section="4"] .branching-choice {
+    position: static;
+    width: auto;
+    max-width: none;
+    background: rgba(0,0,0,0.8);
+    box-shadow: none;
+    border-radius: 8px;
+    padding: 30px;
+    display: none;
+    animation: none;
+  }
+}

@@ -598,6 +598,10 @@ document.addEventListener('DOMContentLoaded', function() {
         }, 600); // Wait for scroll animation to complete
         
         showNotification('Story reset. Choose your path again...');
+
+        // In restartStory, also remove 'blurred' from panel 4
+        const panel4 = document.querySelector('.narrative-section[data-section="4"]');
+        if (panel4) panel4.classList.remove('blurred');
     }
 
     // Setup horizontal scroll functionality
@@ -743,6 +747,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 
                 // Hide branching choice initially for panel 4
                 if (section.dataset.section === '4') {
+                    section.classList.remove('blurred');
                     const branchingChoice = section.querySelector('.branching-choice');
                     if (branchingChoice) {
                         branchingChoice.style.display = 'none';
@@ -788,7 +793,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     
                                     // Special handling for panel 4
                                     if (section.dataset.section === '4') {
-                                        console.log('Panel 4 audio ended - showing branching choice');
+                                        console.log('Panel 4 audio ended - showing branching choice overlay');
+                                        section.classList.add('blurred');
                                         const branchingChoice = section.querySelector('.branching-choice');
                                         if (branchingChoice) {
                                             branchingChoice.style.display = 'flex';

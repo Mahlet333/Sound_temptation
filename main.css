@@ -2690,25 +2690,42 @@ body {
     }
     
     #globalMediaPlayer {
-        padding: 8px 12px;
-        gap: 8px;
-        flex-wrap: wrap;
+        padding: 10px 15px;
+        gap: 10px;
+        flex-wrap: nowrap;
+        border-radius: 8px;
     }
     
     .playback-speed-control {
-        gap: 4px;
-        margin: 0 4px;
+        gap: 6px;
+        margin: 0 6px;
     }
     
     .speed-label {
-        font-size: 0.7rem;
+        font-size: 0.75rem;
     }
     
     .speed-selector {
-        font-size: 0.7rem;
-        padding: 2px 4px;
-        padding-right: 18px;
-        min-width: 45px;
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        padding-right: 20px;
+        min-width: 50px;
+        border-radius: 4px;
+    }
+    
+    .seek-slider {
+        height: 8px;
+        border-radius: 4px;
+    }
+    
+    .seek-slider::-webkit-slider-thumb {
+        width: 18px;
+        height: 18px;
+    }
+    
+    .seek-slider::-moz-range-thumb {
+        width: 18px;
+        height: 18px;
     }
 }
 
@@ -3295,30 +3312,32 @@ body {
     }
 
     /* Panel navigation mobile flexbox */
-    .panel-navigation {
-        position: fixed;
-        bottom: 20px;
-        left: 0;
-        right: 0;
-        width: 100%;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        padding: 0 20px;
-        z-index: 100;
-        transform: none;
-        top: auto;
-    }
+.panel-navigation {
+    position: fixed;
+    bottom: 80px;
+    left: 0;
+    right: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 20px;
+    z-index: 100;
+    transform: none;
+    top: auto;
+}
 
     .nav-btn {
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 12px 20px;
+        padding: 14px 24px;
         font-size: 0.9rem;
         gap: 8px;
-        min-width: 120px;
-        margin: 0 5px;
+        min-width: 140px;
+        margin: 0 8px;
+        border-radius: 6px;
+        font-weight: 500;
     }
 
     /* Team section mobile flexbox */
@@ -3473,17 +3492,18 @@ body {
     /* Global media player mobile positioning */
     #globalMediaPlayer {
         position: fixed;
-        bottom: 20px;
+        bottom: 15px;
         left: 50%;
         transform: translateX(-50%);
         right: auto;
         display: flex;
         align-items: center;
         justify-content: center;
-        padding: 8px 12px;
-        gap: 8px;
-        max-width: 90vw;
+        padding: 10px 15px;
+        gap: 10px;
+        max-width: 95vw;
         flex-wrap: nowrap;
+        border-radius: 8px;
     }
 
     /* Auto-advance mode mobile positioning */
@@ -3598,27 +3618,30 @@ body {
     }
 
     .global-play-pause-btn {
-        width: 32px;
-        height: 32px;
-        font-size: 1.2rem;
+        width: 36px;
+        height: 36px;
+        font-size: 1.3rem;
+        border-width: 2px;
     }
 
     .time-display {
-        font-size: 0.8rem;
-        min-width: 60px;
+        font-size: 0.85rem;
+        min-width: 70px;
+        font-weight: 500;
     }
 
     /* Speed control compact */
     .playback-speed-control {
-        gap: 4px;
-        margin: 0 2px;
+        gap: 6px;
+        margin: 0 6px;
     }
 
     .speed-selector {
-        font-size: 0.7rem;
-        padding: 2px 4px;
-        padding-right: 16px;
-        min-width: 40px;
+        font-size: 0.75rem;
+        padding: 4px 6px;
+        padding-right: 20px;
+        min-width: 50px;
+        border-radius: 4px;
     }
 
     /* Auto-advance compact */

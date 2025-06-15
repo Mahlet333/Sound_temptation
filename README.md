@@ -38,7 +38,7 @@ Sound_Assignment/
 ### Installation
 1. Clone the repository:
    ```bash
-   git clone [repository-url]
+   git clone (https://github.com/Mahlet333/Sound_temptation)
    ```
 2. Navigate to the project directory:
    ```bash
